@@ -66,6 +66,15 @@ h1{
 }
 .stat-pill b{display:block;font-size:18px;color:var(--teal-dark);}
 .stat-pill.alert b{color:var(--stamp-red);}
+.stat-pill.clickable{
+  cursor:pointer;
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.stat-pill.clickable:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--shadow);
+  border-color:var(--teal);
+}
 
 .tabs{
   display:flex;
@@ -452,7 +461,7 @@ table.ledger tr:last-child td{border-bottom:none;}
   border:1.5px solid var(--ink);
   border-radius:8px;
   padding:18px;
-  max-width:360px;
+  max-width:380px;
   width:100%;
   box-shadow:0 8px 24px rgba(0,0,0,0.2);
 }
@@ -500,6 +509,20 @@ table.ledger tr:last-child td{border-bottom:none;}
 .autocomplete-list li:last-child { border-bottom: none; }
 .autocomplete-list li:hover { background: var(--paper-line); color: var(--teal-dark); }
 .autocomplete-hint { font-size: 11px; color: var(--ink-soft); display: block; }
+
+.line-preview-box {
+  width: 100%;
+  height: 140px;
+  background: #fff;
+  border: 1.3px solid #C9BE9C;
+  border-radius: 3px;
+  padding: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  resize: none;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
 </style>
 </head>
 <body>
@@ -679,6 +702,7 @@ table.ledger tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<!-- Modal จัดการหมวดหมู่ -->
 <div class="modal-overlay" id="catModal">
   <div class="modal-box">
     <h3>จัดการหมวดหมู่</h3>
@@ -689,6 +713,18 @@ table.ledger tr:last-child td{border-bottom:none;}
     </div>
     <div class="modal-close-row">
       <button class="btn-ghost" id="closeCatModalBtn">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal รายการใกล้หมดสำหรับก๊อปปี้ส่งไลน์ -->
+<div class="modal-overlay" id="lowStockModal">
+  <div class="modal-box" style="max-width:420px;">
+    <h3>⚠ รายการของใกล้หมด (ส่งไลน์)</h3>
+    <textarea class="line-preview-box" id="lowStockTextarea" readonly></textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn-ghost" id="closeLowModalBtn">ปิด</button>
+      <button class="btn-primary" id="copyLineBtn">📋 คัดลอกข้อความ</button>
     </div>
   </div>
 </div>
@@ -928,8 +964,11 @@ function renderInventory(){
   const lowCount = items.filter(i=>i.qty <= i.threshold).length;
   statsEl.innerHTML = `
     <div class="stat-pill"><b>${total}</b>รายการทั้งหมด</div>
-    <div class="stat-pill ${lowCount>0?'alert':''}"><b>${lowCount}</b>ใกล้หมด</div>
+    <div class="stat-pill alert clickable" id="lowStatPill" title="คลิกเพื่อดูรายการใกล้หมดสำหรับส่งไลน์"><b>${lowCount}</b>ใกล้หมด</div>
   `;
+  
+  document.getElementById('lowStatPill').addEventListener('click', openLowStockModal);
+
   const q = searchInput.value.trim().toLowerCase();
   let list = items.filter(i => i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
   
@@ -965,7 +1004,6 @@ function cardHtml(it){
 
   let subDisplay = '';
   if(it.packQty > 0 && it.packUnit){
-    // แสดงเฉพาะสัดส่วนอัตราส่วนเทียบ (ไม่อาจเอาไปคูณยอดคงเหลือ)
     subDisplay = `<div class="sub-qty-display">1 ${esc(it.unit)} = ${it.packQty} ${esc(it.packUnit)}</div>`;
   }
 
@@ -991,6 +1029,41 @@ function cardHtml(it){
     </div>
   </div>`;
 }
+
+/* ---------------- Low Stock Modal & Line Copy ---------------- */
+const lowStockModal = document.getElementById('lowStockModal');
+document.getElementById('closeLowModalBtn').addEventListener('click', ()=> lowStockModal.classList.remove('open'));
+lowStockModal.addEventListener('click', (e)=>{ if(e.target===lowStockModal) lowStockModal.classList.remove('open'); });
+
+function openLowStockModal(){
+  const lowItems = items.filter(i => i.qty <= i.threshold);
+  const textarea = document.getElementById('lowStockTextarea');
+  
+  if(lowItems.length === 0){
+    textarea.value = `📌 แจ้งเตือนรายการสต๊อก @prem hotel\n\n🎉 เยี่ยม! ตอนนี้ไม่มีสินค้าใกล้หมดหรือหมดสต๊อกครับ`;
+  } else {
+    let text = `🚨 แจ้งเตือนรายการของใกล้หมด (@prem hotel)\nประจำวันที่ ${formatDateTh(todayStr())}\n-----------------------------------\n`;
+    lowItems.forEach((i, idx) => {
+      text += `${idx+1}. ${i.name} - เหลือ ${fmt(i.qty)} ${i.unit || 'หน่วย'} (แจ้งเตือนเมื่อ ≤ ${i.threshold})\n`;
+    });
+    text += `-----------------------------------\nรบกวนพิจารณาจัดซื้อเติมสต๊อกครับ`;
+    textarea.value = text;
+  }
+  
+  lowStockModal.classList.add('open');
+}
+
+document.getElementById('copyLineBtn').addEventListener('click', async ()=>{
+  const textarea = document.getElementById('lowStockTextarea');
+  textarea.select();
+  try {
+    await navigator.clipboard.writeText(textarea.value);
+    alert('คัดลอกข้อความสำเร็จ! นำไปวางใน Line ได้เลยครับ');
+  } catch(err) {
+    document.execCommand('copy');
+    alert('คัดลอกข้อความสำเร็จ!');
+  }
+});
 
 /* ---------------- Ledger System ---------------- */
 function setLedgerType(type){
@@ -1037,7 +1110,6 @@ l_item_list.addEventListener('click', (e)=>{
     l_item_search.value = item.name;
     l_item_list.classList.remove('show');
     
-    // ตั้งค่าตัวเลือกหน่วยย่อย
     const subOpt = document.getElementById('l_sub_option');
     if(item.packQty > 0 && item.packUnit){
       subOpt.textContent = `หน่วยย่อย (${item.packUnit})`;
@@ -1073,7 +1145,6 @@ function updateLedgerCostPreview(){
       html = `💰 ต้นทุนรับซื้อ: <b>${fmt(costPerUnit)}</b> บาท / 1 ${esc(selectedLedgerItem.unit||'หน่วย')} `;
     }
   } else {
-    // โหมดจ่ายออก (เบิก)
     if(mode === 'sub' && selectedLedgerItem.packQty > 0){
       const packUsed = qty / selectedLedgerItem.packQty;
       html = `📦 จะตัดสต็อกออก ${fmt(packUsed)} ${esc(selectedLedgerItem.unit||'แพ็ค')} (${qty} ${esc(selectedLedgerItem.packUnit)})`;
@@ -1093,7 +1164,6 @@ document.getElementById('addLineBtn').addEventListener('click', ()=>{
   const price = parseFloat(document.getElementById('l_price').value) || 0;
   const mode = document.getElementById('l_unit_mode').value;
   
-  // แปลงหน่วยย่อยให้เป็นหน่วยหลักในการบันทึกจริง
   let actualQtyForStock = qty;
   let displayUnitText = selectedLedgerItem.unit || '';
   
