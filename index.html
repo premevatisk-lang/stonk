@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>สต๊อกของ — เปรม แมนชั่น</title>
+<title>สต๊อกของ — @prem hotel</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Chonburi&family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
 
@@ -225,7 +225,6 @@ button:active{transform:translateY(1px);}
   border-top:1px dashed #D8CBA4;
   padding-top:10px;
 }
-.pack-hint{grid-column:1/-1;font-size:11.5px;color:var(--ink-soft);margin-top:-4px;}
 
 .grid{
   display:grid;
@@ -277,16 +276,6 @@ button:active{transform:translateY(1px);}
 }
 .card.low .qty-num{color:var(--stamp-red);}
 .qty-unit{font-size:11px;color:var(--ink-soft);font-weight:500;}
-.sub-qty-display{
-  font-family:'JetBrains Mono',monospace;
-  font-size:12px;
-  color:var(--brass);
-  background:#FBF3E1;
-  padding:2px 6px;
-  border-radius:3px;
-  border:1px dashed #D8B96A;
-  margin-top:2px;
-}
 .threshold-note{font-size:10.5px;color:var(--ink-soft);}
 .card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px dashed #D8CBA4;}
 .icon-btn{
@@ -323,14 +312,6 @@ button:active{transform:translateY(1px);}
 .empty b{display:block;font-family:'Chonburi',cursive;font-size:20px;color:var(--teal-dark);margin-bottom:6px;}
 
 .loading{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14px;}
-
-.footer-actions{
-  text-align:center;
-  margin-top:30px;
-  padding-top:14px;
-  border-top:1px dashed #D8CBA4;
-}
-.footer-actions button{font-size:12px;color:var(--ink-soft);background:none;border:none;text-decoration:underline;}
 
 /* Ledger Table */
 .ledger-form{
@@ -378,6 +359,20 @@ button:active{transform:translateY(1px);}
   line-height:1.6;
 }
 .cost-preview.show{display:block;}
+
+.price-compare-box{
+  grid-column:1/-1;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  border-radius:3px;
+  padding:8px 10px;
+  display:none;
+  line-height:1.5;
+}
+.price-compare-box.show{display:block;}
+.price-compare-box.cheaper{background:#EAF3E8;border:1px dashed var(--green-in);color:var(--green-in);}
+.price-compare-box.dearer{background:var(--stamp-red-bg);border:1px dashed var(--stamp-red);color:var(--stamp-red);}
+.price-compare-box.equal{background:#FBF3E1;border:1px dashed var(--brass);color:var(--brass);}
 
 .ledger-table-wrap{
   background:var(--card-bg);
@@ -446,6 +441,23 @@ table.ledger tr:last-child td{border-bottom:none;}
   border-radius: 4px;
   border: 1px solid var(--stamp-red);
 }
+.summary-total.in-total {
+  color: var(--green-in);
+  background: var(--green-in-bg);
+  border: 1px solid var(--green-in);
+}
+
+.diff-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-top: 3px;
+}
+.diff-badge.cheaper { background: #EAF3E8; color: var(--green-in); border: 1px solid #c5e1c5; }
+.diff-badge.dearer { background: var(--stamp-red-bg); color: var(--stamp-red); border: 1px solid #f5c2bc; }
+.diff-badge.equal { background: #FBF3E1; color: var(--brass); border: 1px solid #edd9af; }
 
 .modal-overlay{
   display:none;
@@ -529,7 +541,7 @@ table.ledger tr:last-child td{border-bottom:none;}
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>สต๊อกของ — เปรม แมนชั่น</h1>
+      <h1>สต๊อกของ — @prem hotel</h1>
       <p class="subtitle">คลังของ บัญชีรับ-จ่าย และต้นทุน พร้อมแจ้งเตือนของใกล้หมด</p>
     </div>
     <div class="stats" id="stats"></div>
@@ -538,7 +550,8 @@ table.ledger tr:last-child td{border-bottom:none;}
   <div class="tabs">
     <button class="tab-btn active" data-tab="inventory">📦 คลังของ</button>
     <button class="tab-btn" data-tab="ledger">📒 บันทึกรับ-จ่าย</button>
-    <button class="tab-btn" data-tab="summary">📅 สรุปรับเข้า (แยกตามวัน)</button>
+    <button class="tab-btn" data-tab="summary">📅 สรุปรับเข้า</button>
+    <button class="tab-btn" data-tab="summary-out">📤 สรุปเบิกจ่าย</button>
   </div>
 
   <!-- หน้าคลังสินค้า -->
@@ -569,40 +582,24 @@ table.ledger tr:last-child td{border-bottom:none;}
         </div>
         
         <div class="field">
-          <label>หน่วยหลัก (หน่วยใหญ่ที่ซื้อ)</label>
-          <input type="text" id="f_unit" placeholder="เช่น แพ็ค, ลัง, กล่อง">
+          <label>หน่วยนับ</label>
+          <input type="text" id="f_unit" placeholder="เช่น แพ็ค, ชิ้น, ลัง, ขวด">
         </div>
         <div class="field">
-          <label>จำนวนคงเหลือเริ่มต้น (นับเป็นหน่วยหลัก)</label>
-          <input type="number" id="f_qty" min="0" value="0" placeholder="เช่น มีกี่แพ็ค">
+          <label>จำนวนคงเหลือเริ่มต้น</label>
+          <input type="number" id="f_qty" min="0" value="0" placeholder="เช่น มีกี่หน่วย">
         </div>
         <div class="field">
-          <label>แจ้งเตือนเมื่อหน่วยหลักเหลือ ≤</label>
+          <label>แจ้งเตือนเมื่อเหลือ ≤</label>
           <input type="number" id="f_threshold" min="0" value="2">
         </div>
         <div class="field"></div>
 
-        <div class="section-label">ตั้งค่าหน่วยย่อย (สำหรับเปรียบเทียบราคา/สัดส่วน เช่น ฟองน้ำ, สบู่)</div>
-        <div class="pack-hint">หากไม่ต้องใช้เทียบหน่วยย่อย (เช่น ถุงขยะเบิกยกแพ็ค) ไม่ต้องกรอกช่องนี้</div>
-        <div class="field">
-          <label>1 หน่วยหลัก มีกี่หน่วยย่อย?</label>
-          <input type="number" id="f_packqty" min="0" placeholder="เช่น ฟองน้ำ 1 แพ็คมี 7 ชิ้น (ใส่ 7)">
-        </div>
-        <div class="field">
-          <label>ชื่อหน่วยย่อย</label>
-          <input type="text" id="f_packunit" list="packUnitList" placeholder="เช่น ชิ้น, ใบ, ซอง">
-          <datalist id="packUnitList">
-            <option value="ชิ้น"><option value="ใบ"><option value="แผ่น">
-            <option value="ซอง"><option value="ก้อน"><option value="มล.">
-          </datalist>
-        </div>
-
-        <div class="section-label">ข้อมูลต้นทุน (ไม่บังคับ)</div>
+        <div class="section-label">ข้อมูลราคา</div>
         <div class="field full">
-          <label>ราคาซื้อล่าสุดต่อ 1 หน่วยหลัก (บาท)</label>
-          <input type="number" id="f_price" min="0" step="0.01" placeholder="เช่น ราคาต่อ 1 แพ็ค">
+          <label>ราคาซื้อล่าสุดต่อ 1 หน่วย (บาท)</label>
+          <input type="number" id="f_price" min="0" step="0.01" placeholder="เช่น ราคาต่อชิ้น หรือต่อแพ็ค">
         </div>
-        <div class="cost-preview" id="f_costPreview"></div>
 
         <div class="photo-row">
           <img id="photoPreview" class="photo-preview" src="" alt="" style="display:none;">
@@ -642,22 +639,16 @@ table.ledger tr:last-child td{border-bottom:none;}
             <ul class="autocomplete-list" id="l_item_list"></ul>
           </div>
         </div>
-        <div class="field">
-          <label>หน่วยที่จะเบิก/รับ</label>
-          <select id="l_unit_mode">
-            <option value="main">หน่วยหลัก (แพ็ค/ลัง)</option>
-            <option value="sub" id="l_sub_option" style="display:none;">หน่วยย่อย (ชิ้น/ใบ)</option>
-          </select>
-        </div>
-        <div class="field">
+        <div class="field full">
           <label>จำนวน</label>
           <input type="number" id="l_qty" min="1" value="1">
         </div>
         <div class="field full" id="l_priceWrap">
-          <label>ราคาที่จ่ายทั้งหมดของรายการนี้ (บาท)</label>
-          <input type="number" id="l_price" min="0" step="0.01" placeholder="เช่น 150">
+          <label>ราคาที่จ่ายทั้งหมดของรายการนี้ตามบิล (บาท)</label>
+          <input type="number" id="l_price" min="0" step="0.01" placeholder="เช่น 150 (อิสระตามบิล)">
         </div>
         <div class="cost-preview" id="l_costPreview"></div>
+        <div class="price-compare-box" id="l_priceCompare"></div>
         <div class="full">
           <button type="button" class="btn-ghost" id="addLineBtn" style="width:100%;">+ เพิ่มรายการนี้ลงในบันทึก</button>
         </div>
@@ -697,8 +688,9 @@ table.ledger tr:last-child td{border-bottom:none;}
     <div id="summaryContent"><div class="loading">กำลังโหลดข้อมูล...</div></div>
   </div>
 
-  <div class="footer-actions">
-    <button id="resetBtn">ล้างข้อมูลทั้งหมด</button>
+  <!-- หน้าสรุปเบิกจ่าย -->
+  <div class="tab-panel" id="tab-summary-out">
+    <div id="summaryOutContent"><div class="loading">กำลังโหลดข้อมูล...</div></div>
   </div>
 </div>
 
@@ -730,9 +722,9 @@ table.ledger tr:last-child td{border-bottom:none;}
 </div>
 
 <script>
-const ITEMS_KEY = 'stock-items-v2';
-const CATS_KEY = 'stock-categories-v2';
-const LOG_KEY = 'stock-transactions-v2';
+const ITEMS_KEY = 'stock-items-v3';
+const CATS_KEY = 'stock-categories-v3';
+const LOG_KEY = 'stock-transactions-v3';
 const DEFAULT_CATS = ['ของใช้ในห้อง','ของใช้ส่วนกลาง','อาหารและเครื่องดื่ม','อุปกรณ์ทำความสะอาด','เครื่องใช้สำนักงาน'];
 
 let items = [];
@@ -752,11 +744,12 @@ const searchInput = document.getElementById('searchInput');
 const ledgerSearch = document.getElementById('ledgerSearch');
 const ledgerBody = document.getElementById('ledgerBody');
 const summaryContent = document.getElementById('summaryContent');
+const summaryOutContent = document.getElementById('summaryOutContent');
 
 function uid(){ return 'i' + Date.now() + Math.random().toString(36).slice(2,7); }
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
-function fmt(n){ return Number(n).toLocaleString('th-TH', {maximumFractionDigits: 4}); }
+function fmt(n){ return Number(n).toLocaleString('th-TH', {maximumFractionDigits: 2}); }
 function formatDateTh(dateStr) {
   if(!dateStr) return '';
   const parts = dateStr.split('-');
@@ -788,6 +781,7 @@ async function loadAll(){
   renderCatSelect();
   renderLedger();
   renderSummary();
+  renderSummaryOut();
 }
 
 async function saveItems(){ try{ await window.storage.set(ITEMS_KEY, JSON.stringify(items), false); }catch(e){ console.error(e); } }
@@ -804,6 +798,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     
     if(btn.dataset.tab === 'ledger'){ renderLedger(); resetLedgerForm(); }
     if(btn.dataset.tab === 'summary'){ renderSummary(); }
+    if(btn.dataset.tab === 'summary-out'){ renderSummaryOut(); }
   });
 });
 
@@ -856,8 +851,6 @@ function openForm(item){
   document.getElementById('f_unit').value = item ? (item.unit||'') : '';
   document.getElementById('f_qty').value = item ? item.qty : 0;
   document.getElementById('f_threshold').value = item ? item.threshold : 2;
-  document.getElementById('f_packqty').value = item && item.packQty ? item.packQty : '';
-  document.getElementById('f_packunit').value = item ? (item.packUnit||'') : '';
   document.getElementById('f_price').value = item && item.lastPrice ? item.lastPrice : '';
   photoBase64 = item ? (item.photo||'') : '';
   updatePhotoPreview();
@@ -865,7 +858,6 @@ function openForm(item){
   renderCatSelect(item ? item.cat : (categories[0]||'__new__'));
   document.getElementById('f_cat_new').value = '';
   formCard.classList.add('open');
-  updateItemCostPreview();
   document.getElementById('f_name').focus();
 }
 function closeForm(){ formCard.classList.remove('open'); editingId = null; photoBase64 = ''; }
@@ -883,26 +875,6 @@ document.getElementById('f_photo').addEventListener('change', (e)=>{
   reader.readAsDataURL(file);
 });
 
-function updateItemCostPreview(){
-  const preview = document.getElementById('f_costPreview');
-  const price = parseFloat(document.getElementById('f_price').value) || 0;
-  const packQty = parseFloat(document.getElementById('f_packqty').value) || 0;
-  const unit = document.getElementById('f_unit').value.trim() || 'หน่วยหลัก';
-  const packUnit = document.getElementById('f_packunit').value.trim() || 'หน่วยย่อย';
-  
-  if(price <= 0){ preview.classList.remove('show'); return; }
-  let html = `💰 ราคาซื้อ ${fmt(price)} บาท / 1 ${esc(unit)}`;
-  if(packQty > 0){
-    const perSub = price / packQty;
-    html += `<br>↳ เฉลี่ยตก ${fmt(perSub)} บาท / 1 ${esc(packUnit)}`;
-  }
-  preview.innerHTML = html;
-  preview.classList.add('show');
-}
-['f_price','f_packqty','f_packunit','f_unit'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', updateItemCostPreview);
-});
-
 document.getElementById('toggleFormBtn').addEventListener('click', ()=>{
   if(formCard.classList.contains('open') && !editingId) closeForm(); else openForm(null);
 });
@@ -916,23 +888,20 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
     cat = document.getElementById('f_cat_new').value.trim();
     if(cat && !categories.includes(cat)){ categories.push(cat); await saveCats(); }
   }
-  const unit = document.getElementById('f_unit').value.trim() || 'แพ็ค';
+  const unit = document.getElementById('f_unit').value.trim() || 'ชิ้น';
   const qty = parseFloat(document.getElementById('f_qty').value) || 0;
   const threshold = parseFloat(document.getElementById('f_threshold').value) || 0;
-  const packQty = parseFloat(document.getElementById('f_packqty').value) || 0;
-  const packUnit = document.getElementById('f_packunit').value.trim();
   const price = parseFloat(document.getElementById('f_price').value) || 0;
 
   if(editingId){
     const it = items.find(i=>i.id===editingId);
     if(it){
       it.name=name; it.cat=cat; it.unit=unit; it.qty=qty; it.threshold=threshold;
-      it.photo=photoBase64; it.packQty=packQty||0; it.packUnit=packUnit;
+      it.photo=photoBase64;
       if(price > 0){ it.lastPrice = price; }
     }
   }else{
-    items.push({ id: uid(), name, cat, unit, qty, threshold, photo: photoBase64,
-      packQty: packQty||0, packUnit, lastPrice: price||0 });
+    items.push({ id: uid(), name, cat, unit, qty, threshold, photo: photoBase64, lastPrice: price||0 });
   }
   await saveItems();
   closeForm();
@@ -945,13 +914,6 @@ document.getElementById('sortLowBtn').addEventListener('click', ()=>{
   renderInventory();
 });
 searchInput.addEventListener('input', renderInventory);
-
-document.getElementById('resetBtn').addEventListener('click', async ()=>{
-  if(!confirm('ต้องการล้างข้อมูลทั้งหมดใช่ไหม?')) return;
-  items = []; categories = [...DEFAULT_CATS]; transactions = [];
-  await Promise.all([saveItems(), saveCats(), saveLog()]);
-  renderInventory(); renderCatSelect(); renderLedger(); renderSummary();
-});
 
 async function deleteItem(id){
   if(!confirm('ลบของชิ้นนี้ใช่ไหม?')) return;
@@ -970,391 +932,423 @@ function renderInventory(){
   document.getElementById('lowStatPill').addEventListener('click', openLowStockModal);
 
   const q = searchInput.value.trim().toLowerCase();
-  let list = items.filter(i => i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
+  let filtered = items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
   
   if(sortLowFirst){
-    list.sort((a,b)=>{
+    filtered.sort((a,b)=>{
       const aLow = a.qty <= a.threshold ? 0 : 1;
       const bLow = b.qty <= b.threshold ? 0 : 1;
       if(aLow !== bLow) return aLow - bLow;
       return a.name.localeCompare(b.name, 'th');
     });
-  } else { 
-    list.sort((a,b)=>a.name.localeCompare(b.name,'th')); 
+  } else {
+    filtered.sort((a,b)=>a.name.localeCompare(b.name, 'th'));
   }
 
-  if(items.length === 0){
-    contentEl.innerHTML = `<div class="empty"><b>ยังไม่มีของในสต๊อก</b>กด "+ เพิ่มของ" เพื่อเริ่มบันทึกรายการ</div>`;
+  if(filtered.length === 0){
+    contentEl.innerHTML = `<div class="empty"><b>ไม่พบรายการของ</b>ลองค้นหาใหม่ หรือกดเพิ่มของ</div>`;
     return;
   }
-  if(list.length === 0){ contentEl.innerHTML = `<div class="empty">ไม่พบของที่ค้นหา</div>`; return; }
 
-  contentEl.innerHTML = `<div class="grid">${list.map(cardHtml).join('')}</div>`;
-  list.forEach(it=>{
-    document.getElementById('edit-'+it.id)?.addEventListener('click', ()=>openForm(it));
-    document.getElementById('del-'+it.id)?.addEventListener('click', ()=>deleteItem(it.id));
-  });
-}
+  let html = '<div class="grid">';
+  filtered.forEach(item=>{
+    const isLow = item.qty <= item.threshold;
+    let photoHtml = item.photo ? `<img class="card-photo" src="${item.photo}" alt="" loading="lazy">` : `<div class="card-photo placeholder">📦</div>`;
+    if(isLow) photoHtml += `<div class="stamp">ใกล้หมด</div>`;
 
-function cardHtml(it){
-  const low = it.qty <= it.threshold;
-  const photoHtml = it.photo
-    ? `<img class="card-photo" src="${it.photo}" alt="${esc(it.name)}">`
-    : `<div class="card-photo placeholder">📦</div>`;
-
-  let subDisplay = '';
-  if(it.packQty > 0 && it.packUnit){
-    subDisplay = `<div class="sub-qty-display">1 ${esc(it.unit)} = ${it.packQty} ${esc(it.packUnit)}</div>`;
-  }
-
-  return `
-  <div class="card ${low?'low':''}">
-    ${low ? '<div class="stamp">ใกล้หมด</div>' : ''}
-    ${photoHtml}
-    <div class="card-body">
-      <div class="card-name">${esc(it.name)}</div>
-      ${it.cat ? `<div class="card-cat">${esc(it.cat)}</div>` : ''}
-      <div class="qty-row">
+    html += `
+    <div class="card ${isLow?'low':''}">
+      ${photoHtml}
+      <div class="card-body">
         <div>
-          <span class="qty-num">${fmt(it.qty)}</span>
-          <span class="qty-unit">${esc(it.unit||'หน่วย')}</span>
+          <div class="card-cat">${esc(item.cat)}</div>
+          <div class="card-name">${esc(item.name)}</div>
+        </div>
+        <div class="qty-row">
+          <div>
+            <span class="qty-num">${fmt(item.qty)}</span>
+            <span class="qty-unit">${esc(item.unit||'หน่วย')}</span>
+          </div>
+          <div class="threshold-note">เตือน ≤ ${fmt(item.threshold)}</div>
+        </div>
+        <div class="card-footer">
+          <span style="font-size:11px;color:var(--ink-soft);">ราคาล่าสุด: ${item.lastPrice ? fmt(item.lastPrice)+'฿' : '-'}</span>
+          <div>
+            <button class="icon-btn" onclick="openForm(items.find(i=>i.id==='${item.id}'))" title="แก้ไข">✏️</button>
+            <button class="icon-btn" onclick="deleteItem('${item.id}')" title="ลบ">🗑️</button>
+          </div>
         </div>
       </div>
-      ${subDisplay}
-      <div class="threshold-note" style="margin-top:2px;">เตือนเมื่อเหลือ ≤ ${it.threshold} ${esc(it.unit||'')}</div>
-      <div class="card-footer">
-        <button class="icon-btn" id="edit-${it.id}">✎ แก้ไข</button>
-        <button class="icon-btn" id="del-${it.id}">🗑 ลบ</button>
-      </div>
     </div>
-  </div>`;
+    `;
+  });
+  html += '</div>';
+  contentEl.innerHTML = html;
 }
 
-/* ---------------- Low Stock Modal & Line Copy ---------------- */
-const lowStockModal = document.getElementById('lowStockModal');
-document.getElementById('closeLowModalBtn').addEventListener('click', ()=> lowStockModal.classList.remove('open'));
-lowStockModal.addEventListener('click', (e)=>{ if(e.target===lowStockModal) lowStockModal.classList.remove('open'); });
+/* ---------------- Ledger (รับ-จ่าย) ---------------- */
+const typeInBtn = document.getElementById('typeInBtn');
+const typeOutBtn = document.getElementById('typeOutBtn');
+const lItemSearch = document.getElementById('l_item_search');
+const lItemList = document.getElementById('l_item_list');
+const lPriceWrap = document.getElementById('l_priceWrap');
+const lCostPreview = document.getElementById('l_costPreview');
+const lPriceCompare = document.getElementById('l_priceCompare');
 
-function openLowStockModal(){
-  const lowItems = items.filter(i => i.qty <= i.threshold);
-  const textarea = document.getElementById('lowStockTextarea');
-  
-  if(lowItems.length === 0){
-    textarea.value = `📌 แจ้งเตือนรายการสต๊อก @prem hotel\n\n🎉 เยี่ยม! ตอนนี้ไม่มีสินค้าใกล้หมดหรือหมดสต๊อกครับ`;
-  } else {
-    let text = `🚨 แจ้งเตือนรายการของใกล้หมด (@prem hotel)\nประจำวันที่ ${formatDateTh(todayStr())}\n-----------------------------------\n`;
-    lowItems.forEach((i, idx) => {
-      text += `${idx+1}. ${i.name} - เหลือ ${fmt(i.qty)} ${i.unit || 'หน่วย'} (แจ้งเตือนเมื่อ ≤ ${i.threshold})\n`;
-    });
-    text += `-----------------------------------\nรบกวนพิจารณาจัดซื้อเติมสต๊อกครับ`;
-    textarea.value = text;
-  }
-  
-  lowStockModal.classList.add('open');
-}
+typeInBtn.addEventListener('click', ()=>setLedgerType('in'));
+typeOutBtn.addEventListener('click', ()=>setLedgerType('out'));
 
-document.getElementById('copyLineBtn').addEventListener('click', async ()=>{
-  const textarea = document.getElementById('lowStockTextarea');
-  textarea.select();
-  try {
-    await navigator.clipboard.writeText(textarea.value);
-    alert('คัดลอกข้อความสำเร็จ! นำไปวางใน Line ได้เลยครับ');
-  } catch(err) {
-    document.execCommand('copy');
-    alert('คัดลอกข้อความสำเร็จ!');
-  }
-});
-
-/* ---------------- Ledger System ---------------- */
-function setLedgerType(type){
-  ledgerType = type;
-  document.getElementById('typeInBtn').classList.toggle('active', type === 'in');
-  document.getElementById('typeOutBtn').classList.toggle('active', type === 'out');
-  document.getElementById('l_priceWrap').style.display = type === 'in' ? 'block' : 'none';
+function setLedgerType(t){
+  ledgerType = t;
+  typeInBtn.classList.toggle('active', t==='in');
+  typeOutBtn.classList.toggle('active', t==='out');
+  lPriceWrap.style.display = t==='in' ? 'block' : 'none';
   updateLedgerCostPreview();
 }
-document.getElementById('typeInBtn').addEventListener('click', ()=>setLedgerType('in'));
-document.getElementById('typeOutBtn').addEventListener('click', ()=>setLedgerType('out'));
 
-const l_item_search = document.getElementById('l_item_search');
-const l_item_list = document.getElementById('l_item_list');
-
-l_item_search.addEventListener('input', (e)=>{
-  const q = e.target.value.trim().toLowerCase();
-  selectedLedgerItem = null; 
-  document.getElementById('l_sub_option').style.display = 'none';
-  document.getElementById('l_unit_mode').value = 'main';
+function resetLedgerForm(){
+  selectedLedgerItem = null;
+  lItemSearch.value = '';
+  document.getElementById('l_qty').value = '1';
+  document.getElementById('l_price').value = '';
+  pendingLines = [];
+  renderPendingLines();
   updateLedgerCostPreview();
-  if(!q){ l_item_list.classList.remove('show'); return; }
-  
-  const matches = items.filter(i => i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
-  if(matches.length === 0){
-    l_item_list.innerHTML = `<li style="color:var(--ink-soft);cursor:default;">ไม่พบของที่ค้นหา</li>`;
-  } else {
-    l_item_list.innerHTML = matches.map(i => `
-      <li data-id="${i.id}">
-        <b>${esc(i.name)}</b> 
-        <span class="autocomplete-hint">คงเหลือ: ${fmt(i.qty)} ${esc(i.unit||'')} ${i.packQty ? `(มีหน่วยย่อย: ${i.packUnit})` : ''}</span>
-      </li>
-    `).join('');
-  }
-  l_item_list.classList.add('show');
+}
+
+lItemSearch.addEventListener('input', ()=>{
+  const q = lItemSearch.value.trim().toLowerCase();
+  if(!q){ lItemList.classList.remove('show'); return; }
+  const match = items.filter(i=>i.name.toLowerCase().includes(q));
+  if(match.length === 0){ lItemList.innerHTML = `<li style="color:var(--ink-soft);">ไม่พบรายการของ</li>`; lItemList.classList.add('show'); return; }
+  lItemList.innerHTML = match.map(i=>`
+    <li data-id="${i.id}">
+      <b>${esc(i.name)}</b> <span class="autocomplete-hint">คงเหลือ: ${fmt(i.qty)} ${esc(i.unit)}</span>
+    </li>
+  `).join('');
+  lItemList.classList.add('show');
 });
 
-l_item_list.addEventListener('click', (e)=>{
+lItemList.addEventListener('click', (e)=>{
   const li = e.target.closest('li');
   if(!li || !li.dataset.id) return;
-  const item = items.find(i => i.id === li.dataset.id);
-  if(item){
-    selectedLedgerItem = item;
-    l_item_search.value = item.name;
-    l_item_list.classList.remove('show');
-    
-    const subOpt = document.getElementById('l_sub_option');
-    if(item.packQty > 0 && item.packUnit){
-      subOpt.textContent = `หน่วยย่อย (${item.packUnit})`;
-      subOpt.style.display = 'block';
-    } else {
-      subOpt.style.display = 'none';
-      document.getElementById('l_unit_mode').value = 'main';
-    }
+  const it = items.find(i=>i.id===li.dataset.id);
+  if(it){
+    selectedLedgerItem = it;
+    lItemSearch.value = it.name;
+    lItemList.classList.remove('show');
     updateLedgerCostPreview();
   }
 });
 
 document.addEventListener('click', (e)=>{
-  if(!e.target.closest('.autocomplete-wrap')){ l_item_list.classList.remove('show'); }
+  if(!lItemSearch.contains(e.target) && !lItemList.contains(e.target)){
+    lItemList.classList.remove('show');
+  }
 });
 
-document.getElementById('l_unit_mode').addEventListener('change', updateLedgerCostPreview);
-document.getElementById('l_qty').addEventListener('input', updateLedgerCostPreview);
-document.getElementById('l_price').addEventListener('input', updateLedgerCostPreview);
+['l_qty','l_price'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateLedgerCostPreview);
+});
 
 function updateLedgerCostPreview(){
-  const preview = document.getElementById('l_costPreview');
+  if(!selectedLedgerItem || ledgerType !== 'in'){ 
+    lCostPreview.classList.remove('show'); 
+    lPriceCompare.classList.remove('show'); 
+    return; 
+  }
   const qty = parseFloat(document.getElementById('l_qty').value) || 0;
   const price = parseFloat(document.getElementById('l_price').value) || 0;
-  const mode = document.getElementById('l_unit_mode').value;
-  
-  if(!selectedLedgerItem || qty <= 0){ preview.classList.remove('show'); return; }
-  
-  let html = '';
-  if(ledgerType === 'in'){
-    if(price > 0 && mode === 'main'){
-      const costPerUnit = price / qty;
-      html = `💰 ต้นทุนรับซื้อ: <b>${fmt(costPerUnit)}</b> บาท / 1 ${esc(selectedLedgerItem.unit||'หน่วย')} `;
-    }
-  } else {
-    if(mode === 'sub' && selectedLedgerItem.packQty > 0){
-      const packUsed = qty / selectedLedgerItem.packQty;
-      html = `📦 จะตัดสต็อกออก ${fmt(packUsed)} ${esc(selectedLedgerItem.unit||'แพ็ค')} (${qty} ${esc(selectedLedgerItem.packUnit)})`;
-    } else {
-      html = `📦 จะตัดสต็อกออก ${qty} ${esc(selectedLedgerItem.unit||'หน่วย')} `;
-    }
+  if(price <= 0 || qty <= 0){ 
+    lCostPreview.classList.remove('show'); 
+    lPriceCompare.classList.remove('show'); 
+    return; 
   }
   
-  if(html){ preview.innerHTML = html; preview.classList.add('show'); } 
-  else { preview.classList.remove('show'); }
+  const unitPrice = price / qty; 
+  lCostPreview.innerHTML = `💵 ต้นทุนรวม ${fmt(price)} บาท (ตก ${fmt(unitPrice)} บาท / ${selectedLedgerItem.unit})`;
+  lCostPreview.classList.add('show');
+
+  const oldPrice = selectedLedgerItem.lastPrice || 0;
+  if(oldPrice > 0){
+    const diff = unitPrice - oldPrice;
+    const pct = Math.abs((diff / oldPrice) * 100);
+    if(diff < 0){
+      lPriceCompare.className = 'price-compare-box show cheaper';
+      lPriceCompare.innerHTML = `📉 <b>ถูกกว่าราคาในคลังเดิม!</b> ประหยัดขึ้น ${fmt(Math.abs(diff))} บาท/${selectedLedgerItem.unit} (${fmt(pct)}%) <span style="font-size:11px;display:block;margin-top:2px;">(ราคาเดิมในคลัง: ${fmt(oldPrice)} ฿)</span>`;
+    } else if(diff > 0){
+      lPriceCompare.className = 'price-compare-box show dearer';
+      lPriceCompare.innerHTML = `📈 <b>แพงกว่าราคาในคลังเดิม!</b> สูงขึ้น ${fmt(diff)} บาท/${selectedLedgerItem.unit} (${fmt(pct)}%) <span style="font-size:11px;display:block;margin-top:2px;">(ราคาเดิมในคลัง: ${fmt(oldPrice)} ฿)</span>`;
+    } else {
+      lPriceCompare.className = 'price-compare-box show equal';
+      lPriceCompare.innerHTML = `⚖️ <b>ราคาเท่ากับครั้งก่อนหน้า</b> (${fmt(oldPrice)} บาท/${selectedLedgerItem.unit})`;
+    }
+  } else {
+    lPriceCompare.className = 'price-compare-box show equal';
+    lPriceCompare.innerHTML = `💡 บันทึกราคาซื้อตั้งต้นครั้งแรกสำหรับรายการนี้`;
+  }
 }
 
 document.getElementById('addLineBtn').addEventListener('click', ()=>{
-  if(!selectedLedgerItem){ alert('กรุณาค้นหาและเลือกของจากรายการ'); return; }
-  const qty = parseFloat(document.getElementById('l_qty').value);
-  if(!qty || qty <= 0){ alert('จำนวนต้องมากกว่า 0'); return; }
-  const price = parseFloat(document.getElementById('l_price').value) || 0;
-  const mode = document.getElementById('l_unit_mode').value;
+  if(!selectedLedgerItem){ alert('กรุณาเลือกของจากช่องค้นหาก่อน'); lItemSearch.focus(); return; }
+  const qty = parseFloat(document.getElementById('l_qty').value) || 0;
+  if(qty <= 0){ alert('กรุณาใส่จำนวนมากกว่า 0'); return; }
+  const price = ledgerType==='in' ? (parseFloat(document.getElementById('l_price').value) || 0) : 0;
   
-  let actualQtyForStock = qty;
-  let displayUnitText = selectedLedgerItem.unit || '';
-  
-  if(mode === 'sub' && selectedLedgerItem.packQty > 0){
-    actualQtyForStock = qty / selectedLedgerItem.packQty;
-    displayUnitText = selectedLedgerItem.packUnit;
-  }
-
-  if(ledgerType === 'out' && actualQtyForStock > selectedLedgerItem.qty){
-    if(!confirm(`ของในสต๊อกมีเหลือแค่ ${fmt(selectedLedgerItem.qty)} ${esc(selectedLedgerItem.unit)} แต่คุณกำลังจะเบิกออก ต้องการทำรายการต่อหรือไม่?`)) return;
+  let priceCheckResult = null;
+  if(ledgerType === 'in' && price > 0){
+    let unitPrice = price / qty;
+    const oldPrice = selectedLedgerItem.lastPrice || 0;
+    if(oldPrice > 0){
+      const diff = unitPrice - oldPrice;
+      const pct = Math.abs((diff / oldPrice) * 100);
+      if(diff < 0) priceCheckResult = {type: 'cheaper', text: `ถูกกว่าเดิม ${fmt(pct)}%`, diff: Math.abs(diff)};
+      else if(diff > 0) priceCheckResult = {type: 'dearer', text: `แพงขึ้น ${fmt(pct)}%`, diff: diff};
+      else priceCheckResult = {type: 'equal', text: `ราคาเท่าเดิม`, diff: 0};
+    } else {
+      priceCheckResult = {type: 'equal', text: `ราคาตั้งต้น`, diff: 0};
+    }
   }
 
   pendingLines.push({
-    item: selectedLedgerItem,
-    inputQty: qty,
-    actualQty: actualQtyForStock,
-    mode: mode,
-    unitText: displayUnitText,
-    price: ledgerType === 'in' ? price : 0
+    id: uid(),
+    itemId: selectedLedgerItem.id,
+    itemName: selectedLedgerItem.name,
+    type: ledgerType,
+    qty,
+    unitName: selectedLedgerItem.unit,
+    price,
+    priceCheck: priceCheckResult
   });
-  
   renderPendingLines();
   selectedLedgerItem = null;
-  l_item_search.value = '';
-  document.getElementById('l_qty').value = 1;
+  lItemSearch.value = '';
+  document.getElementById('l_qty').value = '1';
   document.getElementById('l_price').value = '';
-  document.getElementById('l_sub_option').style.display = 'none';
-  document.getElementById('l_unit_mode').value = 'main';
-  updateLedgerCostPreview();
+  lCostPreview.classList.remove('show');
+  lPriceCompare.classList.remove('show');
 });
 
 function renderPendingLines(){
   const wrap = document.getElementById('pendingWrap');
-  const tbody = document.getElementById('pendingBody');
+  const body = document.getElementById('pendingBody');
   if(pendingLines.length === 0){ wrap.style.display='none'; return; }
-  
   wrap.style.display = 'block';
-  tbody.innerHTML = pendingLines.map((p, idx) => {
-    let priceText = ledgerType === 'in' ? (p.price > 0 ? `${fmt(p.price)} บ.` : '-') : '-';
-    return `
-      <tr>
-        <td>${esc(p.item.name)}</td>
-        <td>${fmt(p.inputQty)} ${esc(p.unitText)}</td>
-        <td>${priceText}</td>
-        <td style="text-align:right;"><button class="ledger-del" onclick="removePending(${idx})">✕ ลบ</button></td>
-      </tr>
-    `;
-  }).join('');
+  body.innerHTML = pendingLines.map((l, idx)=>`
+    <tr>
+      <td><b>${esc(l.itemName)}</b></td>
+      <td><span class="${l.type==='in'?'tag-in':'tag-out'}">${l.type==='in'?'รับ':'จ่าย'}</span> ${fmt(l.qty)} ${esc(l.unitName)}</td>
+      <td>${l.price>0 ? fmt(l.price)+' บาท' : '-'}</td>
+      <td><button class="ledger-del" onclick="removePending(${idx})">✕</button></td>
+    </tr>
+  `).join('');
 }
 window.removePending = function(idx){
   pendingLines.splice(idx, 1);
   renderPendingLines();
-}
+};
 
 document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
   if(pendingLines.length === 0){ alert('ยังไม่มีรายการที่รอบันทึก'); return; }
-  const date = document.getElementById('l_date').value;
-  if(!date){ alert('กรุณาเลือกวันที่'); return; }
+  const date = document.getElementById('l_date').value || todayStr();
   
-  for(let p of pendingLines){
-    const itemInDb = items.find(i => i.id === p.item.id);
-    if(itemInDb){
-      if(ledgerType === 'in'){
-        itemInDb.qty += p.actualQty;
-        if(p.price > 0){ itemInDb.lastPrice = p.price / p.actualQty; }
-      } else {
-        itemInDb.qty = Math.max(0, itemInDb.qty - p.actualQty);
+  for(let l of pendingLines){
+    const it = items.find(i=>i.id===l.itemId);
+    if(!it) continue;
+
+    if(l.type === 'in'){
+      it.qty += l.qty;
+      if(l.price > 0){
+        it.lastPrice = l.price / l.qty; 
       }
+    } else {
+      it.qty = Math.max(0, it.qty - l.qty);
     }
-    
-    transactions.push({
+
+    transactions.unshift({
       id: uid(),
-      date: date,
-      type: ledgerType,
-      itemId: p.item.id,
-      itemName: p.item.name,
-      unit: p.unitText,
-      qty: p.inputQty,
-      actualQty: p.actualQty,
-      price: p.price,
-      timestamp: Date.now()
+      date,
+      itemId: it.id,
+      itemName: it.name,
+      type: l.type,
+      qty: l.qty,
+      unit: l.unitName,
+      price: l.price,
+      priceCheck: l.priceCheck
     });
   }
-  
-  await saveItems();
-  await saveLog();
-  resetLedgerForm();
+
+  await Promise.all([saveItems(), saveLog()]);
+  pendingLines = [];
+  renderPendingLines();
   renderLedger();
+  renderInventory();
   renderSummary();
   alert('บันทึกสำเร็จ!');
 });
 
-function resetLedgerForm(){
-  pendingLines = [];
-  renderPendingLines();
-  selectedLedgerItem = null;
-  l_item_search.value = '';
-  document.getElementById('l_qty').value = 1;
-  document.getElementById('l_price').value = '';
-  document.getElementById('l_sub_option').style.display = 'none';
-  document.getElementById('l_unit_mode').value = 'main';
-  updateLedgerCostPreview();
-}
-
+ledgerSearch.addEventListener('input', renderLedger);
 function renderLedger(){
   const q = ledgerSearch.value.trim().toLowerCase();
-  let list = [...transactions].sort((a,b) => b.timestamp - a.timestamp);
-  if(q){ list = list.filter(t => t.itemName.toLowerCase().includes(q)); }
+  const filtered = transactions.filter(t => !q || t.itemName.toLowerCase().includes(q) || t.date.includes(q));
   
-  if(list.length === 0){
-    ledgerBody.innerHTML = `<tr><td colspan="6" class="empty">ไม่พบประวัติการทำรายการ</td></tr>`;
+  if(filtered.length === 0){
+    ledgerBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:30px;">ไม่พบประวัติรายการ</td></tr>`;
     return;
   }
-  
-  ledgerBody.innerHTML = list.map(t => {
-    const isIn = t.type === 'in';
-    const tag = isIn ? '<span class="tag-in">รับเข้า</span>' : '<span class="tag-out">จ่ายออก</span>';
-    let info = '';
-    if(isIn && t.price > 0){ info = `<span class="ledger-cost">💰 จ่ายไป ${fmt(t.price)} บ.</span>`; }
-    
-    return `
-      <tr>
-        <td>${formatDateTh(t.date)}</td>
-        <td><b>${esc(t.itemName)}</b></td>
-        <td>${tag}</td>
-        <td>${isIn ? '+' : '-'}${fmt(t.qty)} <span style="font-size:11px;color:var(--ink-soft);">${esc(t.unit||'')}</span></td>
-        <td>${info || '-'}</td>
-        <td style="text-align:right;"><button class="ledger-del" onclick="deleteLog('${t.id}')">ลบ</button></td>
-      </tr>
-    `;
-  }).join('');
-}
-ledgerSearch.addEventListener('input', renderLedger);
 
-window.deleteLog = async function(id){
-  if(!confirm('ลบประวัตินี้หรือไม่?')) return;
-  transactions = transactions.filter(t => t.id !== id);
+  ledgerBody.innerHTML = filtered.map(t=>`
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">${formatDateTh(t.date)}</td>
+      <td><b>${esc(t.itemName)}</b></td>
+      <td><span class="${t.type==='in'?'tag-in':'tag-out'}">${t.type==='in'?'รับเข้า':'จ่ายออก'}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${fmt(t.qty)} ${esc(t.unit)}</td>
+      <td class="ledger-cost">${t.price>0 ? fmt(t.price)+' ฿' : '-'}</td>
+      <td><button class="ledger-del" onclick="deleteTransaction('${t.id}')" title="ลบรายการ">🗑️</button></td>
+      </tr>
+  `).join('');
+}
+
+window.deleteTransaction = async function(id){
+  if(!confirm('ต้องการลบประวัติรายการนี้ใช่ไหม? (จำนวนสต๊อกสินค้าจะไม่ถูกย้อนอัตโนมัติ)')) return;
+  transactions = transactions.filter(t=>t.id!==id);
   await saveLog();
   renderLedger();
   renderSummary();
-}
+  renderSummaryOut();
+};
 
-function renderSummary() {
-  const inTx = transactions.filter(t => t.type === 'in');
-  if(inTx.length === 0) {
-    summaryContent.innerHTML = `<div class="empty"><b>ยังไม่มีประวัติการรับเข้า</b></div>`;
+/* ---------------- Summary (สรุปรับเข้าแยกตามวัน) ---------------- */
+function renderSummary(){
+  const ins = transactions.filter(t=>t.type==='in');
+  if(ins.length === 0){
+    summaryContent.innerHTML = `<div class="empty"><b>ยังไม่มีข้อมูลรับเข้า</b>เริ่มบันทึกรับเข้าสินค้าได้ที่หน้าบันทึกรับ-จ่าย</div>`;
     return;
   }
 
-  const grouped = {};
-  inTx.forEach(t => {
-    if(!grouped[t.date]) { grouped[t.date] = { items: [], total: 0 }; }
-    grouped[t.date].items.push(t);
-    grouped[t.date].total += (t.price || 0);
+  const groups = {};
+  ins.forEach(t=>{
+    if(!groups[t.date]) groups[t.date] = [];
+    groups[t.date].push(t);
   });
 
-  const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+  const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+  
   let html = '';
-  sortedDates.forEach(date => {
-    const dayData = grouped[date];
-    let tableRows = dayData.items.map(i => {
-      let priceText = i.price > 0 ? `${fmt(i.price)} บ.` : '-';
-      return `
-        <tr>
-          <td><b>${esc(i.itemName)}</b></td>
-          <td>${fmt(i.qty)} <span style="font-size:11px;color:var(--ink-soft);">${esc(i.unit||'')}</span></td>
-          <td style="text-align:right;">${priceText}</td>
-        </tr>
-      `;
-    }).join('');
+  sortedDates.forEach(date=>{
+    const list = groups[date];
+    let dayTotal = list.reduce((sum, t)=>sum + (t.price||0), 0);
 
     html += `
-      <div class="summary-card">
-        <div class="summary-header">
-          <div class="summary-date">📅 วันที่ ${formatDateTh(date)}</div>
-          <div class="summary-total">รวมยอด ${fmt(dayData.total)} บาท</div>
-        </div>
-        <div class="ledger-table-wrap" style="box-shadow:none; border-color:var(--paper-line);">
-          <table class="ledger">
-            <thead>
-              <tr><th>รายการที่รับเข้า</th><th>จำนวน</th><th style="text-align:right;">ราคาที่จ่าย</th></tr>
-            </thead>
-            <tbody>${tableRows}</tbody>
-          </table>
-        </div>
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-date">📅 วันที่ ${formatDateTh(date)}</div>
+        <div class="summary-total in-total">รวมจ่าย: ${fmt(dayTotal)} บาท</div>
       </div>
+      <div class="ledger-table-wrap" style="box-shadow:none;border:1.3px solid var(--paper-line);">
+        <table class="ledger">
+          <thead><tr><th>รายการ</th><th>จำนวน</th><th>ราคาและผลเทียบราคา</th></tr></thead>
+          <tbody>
+            ${list.map(t=>{
+              let badgeHtml = '';
+              if(t.priceCheck && t.priceCheck.type){
+                const pc = t.priceCheck;
+                badgeHtml = `<br><span class="diff-badge ${pc.type}">${pc.type==='cheaper'?'📉 ถูกกว่า: ':pc.type==='dearer'?'📈 แพงกว่า: ':'⚖️ '}${pc.text}</span>`;
+              }
+              return `
+              <tr>
+                <td><b>${esc(t.itemName)}</b></td>
+                <td style="font-family:'JetBrains Mono',monospace;">${fmt(t.qty)} ${esc(t.unit)}</td>
+                <td>
+                  <span class="ledger-cost">${t.price>0 ? fmt(t.price)+' ฿' : '-'}</span>
+                  ${badgeHtml}
+                </td>
+              </tr>
+            `;}).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
     `;
   });
   summaryContent.innerHTML = html;
 }
 
+/* ---------------- Summary Out (สรุปเบิกจ่ายแยกตามวัน) ---------------- */
+function renderSummaryOut(){
+  const outs = transactions.filter(t=>t.type==='out');
+  if(outs.length === 0){
+    summaryOutContent.innerHTML = `<div class="empty"><b>ยังไม่มีข้อมูลเบิกจ่ายออก</b>เริ่มบันทึกการเบิกใช้ได้ที่หน้าบันทึกรับ-จ่าย</div>`;
+    return;
+  }
+
+  const groups = {};
+  outs.forEach(t=>{
+    if(!groups[t.date]) groups[t.date] = [];
+    groups[t.date].push(t);
+  });
+
+  const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
+  
+  let html = '';
+  sortedDates.forEach(date=>{
+    const list = groups[date];
+
+    html += `
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-date">📅 วันที่ ${formatDateTh(date)}</div>
+        <div class="summary-total">รวมเบิก: ${fmt(list.length)} รายการ</div>
+      </div>
+      <div class="ledger-table-wrap" style="box-shadow:none;border:1.3px solid var(--paper-line);">
+        <table class="ledger">
+          <thead><tr><th>รายการ</th><th>จำนวนที่เบิก</th></tr></thead>
+          <tbody>
+            ${list.map(t=>`
+              <tr>
+                <td><b>${esc(t.itemName)}</b></td>
+                <td style="font-family:'JetBrains Mono',monospace;">${fmt(t.qty)} ${esc(t.unit)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    `;
+  });
+  summaryOutContent.innerHTML = html;
+}
+
+/* ---------------- Modal ของใกล้หมด (ส่งไลน์) ---------------- */
+const lowStockModal = document.getElementById('lowStockModal');
+function openLowStockModal(){
+  const lowItems = items.filter(i=>i.qty <= i.threshold);
+  let text = '⚠ รายการของใกล้หมด (@prem hotel):\n\n';
+  if(lowItems.length === 0){
+    text += '- ไม่มีของใกล้หมดในขณะนี้ -';
+  } else {
+    lowItems.forEach((i, idx)=>{
+      text += `${idx+1}. ${i.name} เหลือ ${fmt(i.qty)} ${i.unit} (ขั้นต่ำ: ${i.threshold})\n`;
+    });
+  }
+  document.getElementById('lowStockTextarea').value = text;
+  lowStockModal.classList.add('open');
+}
+document.getElementById('closeLowModalBtn').addEventListener('click', ()=> lowStockModal.classList.remove('open'));
+lowStockModal.addEventListener('click', (e)=>{ if(e.target===lowStockModal) lowStockModal.classList.remove('open'); });
+
+document.getElementById('copyLineBtn').addEventListener('click', ()=>{
+  const ta = document.getElementById('lowStockTextarea');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    alert('คัดลอกข้อความสำหรับส่งไลน์แล้ว!');
+  }).catch(()=>{
+    document.execCommand('copy');
+    alert('คัดลอกข้อความแล้ว!');
+  });
+});
+
+// เริ่มต้นโหลดข้อมูล
 loadAll();
 </script>
 </body>
