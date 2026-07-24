@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สต๊อกของ — เปรม แมนชั่น</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Chonburi&family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root{
+  --paper:#F5EFDE;
+  --paper-line:#E4D9BB;
+  --ink:#2B3A42;
+  --ink-soft:#5B6B70;
+  --teal:#0F6B5C;
+  --teal-dark:#0A4F45;
+  --brass:#B8863B;
+  --stamp-red:#B23A2E;
+  --stamp-red-bg:#FBEAE6;
+  --card-bg:#FFFDF7;
+  --shadow: 0 2px 8px rgba(43,58,66,0.08), 0 1px 2px rgba(43,58,66,0.06);
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:
+    repeating-linear-gradient(180deg, transparent, transparent 27px, var(--paper-line) 28px),
+    var(--paper);
+  font-family:'Sarabun', sans-serif;
+  color:var(--ink);
+  min-height:100vh;
+  padding:20px 14px 60px;
+}
+.wrap{max-width:900px;margin:0 auto;}
+
+header.top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+  border-bottom:3px double var(--ink);
+  padding-bottom:12px;
+}
+h1{
+  font-family:'Chonburi', cursive;
+  font-size:clamp(24px,4vw,34px);
+  color:var(--teal-dark);
+  margin:0 0 2px 0;
+  letter-spacing:0.5px;
+}
+.subtitle{font-size:13px;color:var(--ink-soft);margin:0;}
+.stats{display:flex;gap:10px;flex-wrap:wrap;}
+.stat-pill{
+  background:var(--card-bg);
+  border:1.5px solid var(--ink);
+  border-radius:3px;
+  padding:6px 12px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  text-align:center;
+  min-width:64px;
+}
+.stat-pill b{display:block;font-size:18px;color:var(--teal-dark);}
+.stat-pill.alert b{color:var(--stamp-red);}
+
+.toolbar{
+  display:flex;
+  gap:10px;
+  margin:16px 0;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.search{
+  flex:1;
+  min-width:160px;
+  padding:10px 12px;
+  border:1.5px solid var(--ink);
+  border-radius:3px;
+  background:var(--card-bg);
+  font-family:'Sarabun',sans-serif;
+  font-size:14px;
+  color:var(--ink);
+}
+.search:focus{outline:2px solid var(--teal);outline-offset:1px;}
+button{
+  font-family:'Sarabun',sans-serif;
+  cursor:pointer;
+  border-radius:3px;
+  font-weight:600;
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+button:active{transform:translateY(1px);}
+.btn-primary{
+  background:var(--teal);
+  color:#fff;
+  border:1.5px solid var(--teal-dark);
+  padding:10px 16px;
+  font-size:14px;
+  white-space:nowrap;
+}
+.btn-primary:hover{background:var(--teal-dark);}
+.btn-ghost{
+  background:transparent;
+  color:var(--ink);
+  border:1.5px solid var(--ink);
+  padding:10px 14px;
+  font-size:13px;
+}
+.btn-ghost:hover{background:rgba(43,58,66,0.06);}
+.btn-sort.active{background:var(--brass);color:#fff;border-color:#8f6a2c;}
+
+/* Form */
+.form-card{
+  background:var(--card-bg);
+  border:1.5px solid var(--ink);
+  border-radius:6px;
+  padding:16px;
+  margin-bottom:18px;
+  box-shadow:var(--shadow);
+  display:none;
+}
+.form-card.open{display:block;}
+.form-card h2{
+  font-family:'Chonburi',cursive;
+  font-size:17px;
+  color:var(--teal-dark);
+  margin:0 0 12px 0;
+}
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 12px;
+}
+.form-grid .full{grid-column:1/-1;}
+.field label{
+  display:block;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-bottom:4px;
+  font-weight:600;
+}
+.field input, .field select{
+  width:100%;
+  padding:9px 10px;
+  border:1.3px solid #C9BE9C;
+  border-radius:3px;
+  font-family:'Sarabun',sans-serif;
+  font-size:14px;
+  background:#fff;
+  color:var(--ink);
+}
+.field input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+.photo-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  grid-column:1/-1;
+}
+.photo-preview{
+  width:56px;height:56px;
+  border-radius:4px;
+  border:1.3px solid #C9BE9C;
+  object-fit:cover;
+  background:#EFE8D4;
+  flex-shrink:0;
+}
+.form-actions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
+  justify-content:flex-end;
+}
+
+/* Grid of cards */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:14px;
+}
+.card{
+  position:relative;
+  background:var(--card-bg);
+  border:1.5px solid var(--ink);
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+}
+.card.low{background:var(--stamp-red-bg);}
+.card-photo{
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  background:#EFE8D4;
+  border-bottom:1.5px solid var(--ink);
+  display:block;
+}
+.card-photo.placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  color:#C9BE9C;
+}
+.card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1;}
+.card-name{font-size:14.5px;font-weight:700;line-height:1.25;}
+.card-cat{font-size:11px;color:var(--ink-soft);margin-top:-4px;}
+.qty-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:auto;
+  gap:6px;
+}
+.qty-num{
+  font-family:'JetBrains Mono',monospace;
+  font-weight:700;
+  font-size:20px;
+  color:var(--teal-dark);
+}
+.card.low .qty-num{color:var(--stamp-red);}
+.qty-unit{font-size:11px;color:var(--ink-soft);font-weight:500;}
+.qty-controls{display:flex;gap:4px;}
+.qty-btn{
+  width:26px;height:26px;
+  border:1.3px solid var(--ink);
+  background:#fff;
+  font-size:15px;
+  font-weight:700;
+  line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink);
+}
+.qty-btn:hover{background:var(--paper-line);}
+.threshold-note{font-size:10.5px;color:var(--ink-soft);}
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:4px;border-top:1px dashed #D8CBA4;}
+.icon-btn{
+  background:none;border:none;font-size:13px;color:var(--ink-soft);
+  padding:2px 4px;
+}
+.icon-btn:hover{color:var(--stamp-red);}
+
+/* Stamp */
+.stamp{
+  position:absolute;
+  top:10px;
+  right:-28px;
+  transform:rotate(24deg);
+  background:transparent;
+  border:2.5px solid var(--stamp-red);
+  color:var(--stamp-red);
+  font-family:'Chonburi',cursive;
+  font-size:12.5px;
+  padding:3px 30px;
+  letter-spacing:1px;
+  opacity:0.88;
+  pointer-events:none;
+  border-radius:2px;
+  box-shadow: inset 0 0 0 1.5px var(--stamp-red);
+  mix-blend-mode:multiply;
+}
+
+.empty{
+  text-align:center;
+  padding:50px 20px;
+  color:var(--ink-soft);
+  font-size:14px;
+}
+.empty b{display:block;font-family:'Chonburi',cursive;font-size:20px;color:var(--teal-dark);margin-bottom:6px;}
+
+.loading{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14px;}
+
+.footer-actions{
+  text-align:center;
+  margin-top:30px;
+  padding-top:14px;
+  border-top:1px dashed #D8CBA4;
+}
+.footer-actions button{font-size:12px;color:var(--ink-soft);background:none;border:none;text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>สต๊อกของ — เปรม แมนชั่น</h1>
+      <p class="subtitle">รายการของใช้ในโรงแรม พร้อมแจ้งเตือนของใกล้หมด</p>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="toolbar">
+    <input type="text" class="search" id="searchInput" placeholder="🔍 ค้นหาของ...">
+    <button class="btn-ghost btn-sort" id="sortLowBtn">⚠ ของใกล้หมดก่อน</button>
+    <button class="btn-primary" id="toggleFormBtn">+ เพิ่มของ</button>
+  </div>
+
+  <div class="form-card" id="formCard">
+    <h2 id="formTitle">เพิ่มของใหม่</h2>
+    <div class="form-grid">
+      <div class="field full">
+        <label>ชื่อของ</label>
+        <input type="text" id="f_name" placeholder="เช่น สบู่, ผ้าเช็ดตัว, กระดาษทิชชู่">
+      </div>
+      <div class="field">
+        <label>หมวดหมู่ (ไม่บังคับ)</label>
+        <input type="text" id="f_cat" placeholder="เช่น ของใช้ในห้อง">
+      </div>
+      <div class="field">
+        <label>หน่วยนับ</label>
+        <input type="text" id="f_unit" placeholder="เช่น ชิ้น, ขวด, ม้วน">
+      </div>
+      <div class="field">
+        <label>จำนวนคงเหลือ</label>
+        <input type="number" id="f_qty" min="0" value="0">
+      </div>
+      <div class="field">
+        <label>แจ้งเตือนเมื่อเหลือ ≤</label>
+        <input type="number" id="f_threshold" min="0" value="5">
+      </div>
+      <div class="photo-row">
+        <img id="photoPreview" class="photo-preview" src="" alt="" style="display:none;">
+        <div class="photo-preview" id="photoPlaceholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;">📷</div>
+        <input type="file" id="f_photo" accept="image/*" style="flex:1;font-size:12px;">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-ghost" id="cancelFormBtn">ยกเลิก</button>
+      <button class="btn-primary" id="saveBtn">บันทึก</button>
+    </div>
+  </div>
+
+  <div id="content"><div class="loading">กำลังโหลดข้อมูล...</div></div>
+
+  <div class="footer-actions">
+    <button id="resetBtn">ล้างข้อมูลทั้งหมด</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'stock-items';
+let items = [];
+let editingId = null;
+let sortLowFirst = true;
+let photoBase64 = '';
+
+const contentEl = document.getElementById('content');
+const statsEl = document.getElementById('stats');
+const formCard = document.getElementById('formCard');
+const searchInput = document.getElementById('searchInput');
+
+function uid(){ return 'i' + Date.now() + Math.random().toString(36).slice(2,7); }
+
+async function loadItems(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    items = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    items = [];
+  }
+  render();
+}
+
+async function saveItems(){
+  try{
+    await window.storage.set(STORAGE_KEY, JSON.stringify(items), false);
+  }catch(e){
+    console.error('บันทึกข้อมูลไม่สำเร็จ', e);
+  }
+}
+
+function openForm(item){
+  editingId = item ? item.id : null;
+  document.getElementById('formTitle').textContent = item ? 'แก้ไขของ' : 'เพิ่มของใหม่';
+  document.getElementById('f_name').value = item ? item.name : '';
+  document.getElementById('f_cat').value = item ? (item.cat||'') : '';
+  document.getElementById('f_unit').value = item ? (item.unit||'') : '';
+  document.getElementById('f_qty').value = item ? item.qty : 0;
+  document.getElementById('f_threshold').value = item ? item.threshold : 5;
+  photoBase64 = item ? (item.photo||'') : '';
+  updatePhotoPreview();
+  document.getElementById('f_photo').value = '';
+  formCard.classList.add('open');
+  document.getElementById('f_name').focus();
+}
+
+function closeForm(){
+  formCard.classList.remove('open');
+  editingId = null;
+  photoBase64 = '';
+}
+
+function updatePhotoPreview(){
+  const img = document.getElementById('photoPreview');
+  const ph = document.getElementById('photoPlaceholder');
+  if(photoBase64){
+    img.src = photoBase64;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+  }else{
+    img.style.display = 'none';
+    ph.style.display = 'flex';
+  }
+}
+
+document.getElementById('f_photo').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    photoBase64 = reader.result;
+    updatePhotoPreview();
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('toggleFormBtn').addEventListener('click', ()=>{
+  if(formCard.classList.contains('open') && !editingId){
+    closeForm();
+  }else{
+    openForm(null);
+  }
+});
+document.getElementById('cancelFormBtn').addEventListener('click', closeForm);
+
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('f_name').value.trim();
+  if(!name){ alert('กรุณาใส่ชื่อของ'); return; }
+  const cat = document.getElementById('f_cat').value.trim();
+  const unit = document.getElementById('f_unit').value.trim();
+  const qty = parseInt(document.getElementById('f_qty').value) || 0;
+  const threshold = parseInt(document.getElementById('f_threshold').value) || 0;
+
+  if(editingId){
+    const it = items.find(i=>i.id===editingId);
+    if(it){
+      it.name=name; it.cat=cat; it.unit=unit; it.qty=qty; it.threshold=threshold; it.photo=photoBase64;
+    }
+  }else{
+    items.push({ id: uid(), name, cat, unit, qty, threshold, photo: photoBase64 });
+  }
+  await saveItems();
+  closeForm();
+  render();
+});
+
+document.getElementById('sortLowBtn').addEventListener('click', ()=>{
+  sortLowFirst = !sortLowFirst;
+  document.getElementById('sortLowBtn').classList.toggle('active', sortLowFirst);
+  render();
+});
+
+searchInput.addEventListener('input', render);
+
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  if(!confirm('ต้องการล้างข้อมูลของทั้งหมดใช่ไหม? ทำแล้วกู้คืนไม่ได้')) return;
+  items = [];
+  await saveItems();
+  render();
+});
+
+async function changeQty(id, delta){
+  const it = items.find(i=>i.id===id);
+  if(!it) return;
+  it.qty = Math.max(0, it.qty + delta);
+  await saveItems();
+  render();
+}
+
+async function deleteItem(id){
+  if(!confirm('ลบของชิ้นนี้ใช่ไหม?')) return;
+  items = items.filter(i=>i.id!==id);
+  await saveItems();
+  render();
+}
+
+function render(){
+  // stats
+  const total = items.length;
+  const lowCount = items.filter(i=>i.qty <= i.threshold).length;
+  statsEl.innerHTML = `
+    <div class="stat-pill"><b>${total}</b>รายการทั้งหมด</div>
+    <div class="stat-pill ${lowCount>0?'alert':''}"><b>${lowCount}</b>ใกล้หมด</div>
+  `;
+
+  const q = searchInput.value.trim().toLowerCase();
+  let list = items.filter(i => i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
+
+  if(sortLowFirst){
+    list.sort((a,b)=>{
+      const aLow = a.qty <= a.threshold ? 0 : 1;
+      const bLow = b.qty <= b.threshold ? 0 : 1;
+      if(aLow !== bLow) return aLow - bLow;
+      return a.name.localeCompare(b.name, 'th');
+    });
+  } else {
+    list.sort((a,b)=>a.name.localeCompare(b.name,'th'));
+  }
+
+  if(items.length === 0){
+    contentEl.innerHTML = `<div class="empty"><b>ยังไม่มีของในสต๊อก</b>กด "+ เพิ่มของ" เพื่อเริ่มบันทึกรายการ</div>`;
+    return;
+  }
+  if(list.length === 0){
+    contentEl.innerHTML = `<div class="empty">ไม่พบของที่ค้นหา</div>`;
+    return;
+  }
+
+  contentEl.innerHTML = `<div class="grid">${list.map(cardHtml).join('')}</div>`;
+
+  list.forEach(it=>{
+    document.getElementById('plus-'+it.id)?.addEventListener('click', ()=>changeQty(it.id, 1));
+    document.getElementById('minus-'+it.id)?.addEventListener('click', ()=>changeQty(it.id, -1));
+    document.getElementById('edit-'+it.id)?.addEventListener('click', ()=>openForm(it));
+    document.getElementById('del-'+it.id)?.addEventListener('click', ()=>deleteItem(it.id));
+  });
+}
+
+function esc(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function cardHtml(it){
+  const low = it.qty <= it.threshold;
+  const photoHtml = it.photo
+    ? `<img class="card-photo" src="${it.photo}" alt="${esc(it.name)}">`
+    : `<div class="card-photo placeholder">📦</div>`;
+  return `
+  <div class="card ${low?'low':''}">
+    ${low ? '<div class="stamp">ใกล้หมด</div>' : ''}
+    ${photoHtml}
+    <div class="card-body">
+      <div class="card-name">${esc(it.name)}</div>
+      ${it.cat ? `<div class="card-cat">${esc(it.cat)}</div>` : ''}
+      <div class="qty-row">
+        <div>
+          <span class="qty-num">${it.qty}</span>
+          <span class="qty-unit">${esc(it.unit||'')}</span>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" id="minus-${it.id}">−</button>
+          <button class="qty-btn" id="plus-${it.id}">+</button>
+        </div>
+      </div>
+      <div class="threshold-note">แจ้งเตือนเมื่อเหลือ ≤ ${it.threshold} ${esc(it.unit||'')}</div>
+      <div class="card-footer">
+        <button class="icon-btn" id="edit-${it.id}">✎ แก้ไข</button>
+        <button class="icon-btn" id="del-${it.id}">🗑 ลบ</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+loadItems();
+</script>
+</body>
+</html>
