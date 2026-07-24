@@ -258,6 +258,7 @@ button:active{transform:translateY(1px);}
   justify-content:space-between;
   margin-top:auto;
   gap:6px;
+  padding-top:4px;
 }
 .qty-num{
   font-family:'JetBrains Mono',monospace;
@@ -267,18 +268,6 @@ button:active{transform:translateY(1px);}
 }
 .card.low .qty-num{color:var(--stamp-red);}
 .qty-unit{font-size:11px;color:var(--ink-soft);font-weight:500;}
-.qty-controls{display:flex;gap:4px;}
-.qty-btn{
-  width:26px;height:26px;
-  border:1.3px solid var(--ink);
-  background:#fff;
-  font-size:15px;
-  font-weight:700;
-  line-height:1;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--ink);
-}
-.qty-btn:hover{background:var(--paper-line);}
 .threshold-note{font-size:10.5px;color:var(--ink-soft);}
 .cost-line{
   font-family:'JetBrains Mono',monospace;
@@ -290,7 +279,7 @@ button:active{transform:translateY(1px);}
   padding:4px 6px;
   line-height:1.5;
 }
-.card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:4px;border-top:1px dashed #D8CBA4;}
+.card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px dashed #D8CBA4;}
 .icon-btn{
   background:none;border:none;font-size:13px;color:var(--ink-soft);
   padding:2px 4px;
@@ -565,7 +554,7 @@ table.ledger tr:last-child td{border-bottom:none;}
           <input type="text" id="f_unit" placeholder="เช่น แพ็ค, ขวด, ชิ้น">
         </div>
         <div class="field">
-          <label>จำนวนคงเหลือ</label>
+          <label>จำนวนคงเหลือเริ่มต้น</label>
           <input type="number" id="f_qty" min="0" value="0">
         </div>
         <div class="field">
@@ -728,7 +717,6 @@ function uid(){ return 'i' + Date.now() + Math.random().toString(36).slice(2,7);
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function fmt(n){ return Number(n).toLocaleString('th-TH', {maximumFractionDigits: 4}); }
-// แปลงวันที่ YYYY-MM-DD เป็น DD/MM/YYYY
 function formatDateTh(dateStr) {
   if(!dateStr) return '';
   const parts = dateStr.split('-');
@@ -926,12 +914,6 @@ document.getElementById('resetBtn').addEventListener('click', async ()=>{
   renderInventory(); renderCatSelect(); renderLedger(); renderSummary();
 });
 
-async function changeQty(id, delta){
-  const it = items.find(i=>i.id===id);
-  if(!it) return;
-  it.qty = Math.max(0, it.qty + delta);
-  await saveItems(); renderInventory();
-}
 async function deleteItem(id){
   if(!confirm('ลบของชิ้นนี้ใช่ไหม?')) return;
   items = items.filter(i=>i.id!==id);
@@ -967,8 +949,6 @@ function renderInventory(){
 
   contentEl.innerHTML = `<div class="grid">${list.map(cardHtml).join('')}</div>`;
   list.forEach(it=>{
-    document.getElementById('plus-'+it.id)?.addEventListener('click', ()=>changeQty(it.id, 1));
-    document.getElementById('minus-'+it.id)?.addEventListener('click', ()=>changeQty(it.id, -1));
     document.getElementById('edit-'+it.id)?.addEventListener('click', ()=>openForm(it));
     document.getElementById('del-'+it.id)?.addEventListener('click', ()=>deleteItem(it.id));
   });
@@ -1005,10 +985,6 @@ function cardHtml(it){
         <div>
           <span class="qty-num">${it.qty}</span>
           <span class="qty-unit">${esc(it.unit||'')}</span>
-        </div>
-        <div class="qty-controls">
-          <button class="qty-btn" id="minus-${it.id}">−</button>
-          <button class="qty-btn" id="plus-${it.id}">+</button>
         </div>
       </div>
       <div class="threshold-note">แจ้งเตือนเมื่อเหลือ ≤ ${it.threshold} ${esc(it.unit||'')}</div>
@@ -1189,7 +1165,7 @@ document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
   await saveLog();
   resetLedgerForm();
   renderLedger();
-  renderSummary(); // อัปเดตหน้าสรุปรับเข้าด้วย
+  renderSummary();
   alert('บันทึกสำเร็จ!');
 });
 
@@ -1241,7 +1217,7 @@ window.deleteLog = async function(id){
   transactions = transactions.filter(t => t.id !== id);
   await saveLog();
   renderLedger();
-  renderSummary(); // อัปเดตหน้าสรุปด้วย
+  renderSummary();
 }
 
 /* ---------------- หน้าสรุปรับเข้า (แยกตามวัน) ---------------- */
@@ -1253,7 +1229,6 @@ function renderSummary() {
     return;
   }
 
-  // จัดกลุ่มตามวันที่
   const grouped = {};
   inTx.forEach(t => {
     if(!grouped[t.date]) {
@@ -1263,7 +1238,6 @@ function renderSummary() {
     grouped[t.date].total += (t.price || 0);
   });
 
-  // เรียงวันที่ล่าสุดขึ้นก่อน
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   let html = '';
