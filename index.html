@@ -279,15 +279,6 @@ button:active{transform:translateY(1px);}
   margin-top:2px;
 }
 .threshold-note{font-size:10.5px;color:var(--ink-soft);}
-.cost-line{
-  font-family:'JetBrains Mono',monospace;
-  font-size:11px;
-  color:var(--ink-soft);
-  background:rgba(0,0,0,0.03);
-  border-radius:3px;
-  padding:4px 6px;
-  line-height:1.4;
-}
 .card-footer{display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px dashed #D8CBA4;}
 .icon-btn{
   background:none;border:none;font-size:13px;color:var(--ink-soft);
@@ -568,8 +559,8 @@ table.ledger tr:last-child td{border-bottom:none;}
         </div>
         <div class="field"></div>
 
-        <div class="section-label">ตั้งค่าหน่วยย่อย (สำหรับของที่แกะใช้ทีละชิ้น เช่น ฟองน้ำ, สบู่)</div>
-        <div class="pack-hint">หากไม่ต้องแกะใช้ย่อย (เช่น ถุงขยะเบิกยกแพ็ค) ไม่ต้องกรอกช่องนี้</div>
+        <div class="section-label">ตั้งค่าหน่วยย่อย (สำหรับเปรียบเทียบราคา/สัดส่วน เช่น ฟองน้ำ, สบู่)</div>
+        <div class="pack-hint">หากไม่ต้องใช้เทียบหน่วยย่อย (เช่น ถุงขยะเบิกยกแพ็ค) ไม่ต้องกรอกช่องนี้</div>
         <div class="field">
           <label>1 หน่วยหลัก มีกี่หน่วยย่อย?</label>
           <input type="number" id="f_packqty" min="0" placeholder="เช่น ฟองน้ำ 1 แพ็คมี 7 ชิ้น (ใส่ 7)">
@@ -974,9 +965,8 @@ function cardHtml(it){
 
   let subDisplay = '';
   if(it.packQty > 0 && it.packUnit){
-    // แปลงยอดคงเหลือหน่วยหลัก ออกมาเป็นหน่วยย่อยโดยประมาณ เพื่อให้แม่บ้านเห็นภาพ
-    const totalSub = it.qty * it.packQty;
-    subDisplay = `<div class="sub-qty-display">≈ ${fmt(totalSub)} ${esc(it.packUnit)} (1 ${esc(it.unit)}=${it.packQty} ${esc(it.packUnit)})</div>`;
+    // แสดงเฉพาะสัดส่วนอัตราส่วนเทียบ (ไม่อาจเอาไปคูณยอดคงเหลือ)
+    subDisplay = `<div class="sub-qty-display">1 ${esc(it.unit)} = ${it.packQty} ${esc(it.packUnit)}</div>`;
   }
 
   return `
