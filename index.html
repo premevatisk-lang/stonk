@@ -76,6 +76,23 @@ h1{
   border-color:var(--teal);
 }
 
+.sync-badge{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  padding:5px 10px;
+  border-radius:3px;
+  border:1.3px solid var(--ink-soft);
+  color:var(--ink-soft);
+  background:var(--card-bg);
+  display:flex;
+  align-items:center;
+  gap:5px;
+  white-space:nowrap;
+}
+.sync-badge.ok{border-color:var(--green-in);color:var(--green-in);background:var(--green-in-bg);}
+.sync-badge.err{border-color:var(--stamp-red);color:var(--stamp-red);background:var(--stamp-red-bg);}
+.sync-badge.busy{border-color:var(--brass);color:var(--brass);background:#FBF3E1;}
+
 .tabs{
   display:flex;
   gap:6px;
@@ -127,6 +144,7 @@ button{
   transition:transform .08s ease, box-shadow .08s ease;
 }
 button:active{transform:translateY(1px);}
+button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
 .btn-primary{
   background:var(--teal);
   color:#fff;
@@ -722,10 +740,19 @@ table.ledger tr:last-child td{border-bottom:none;}
 </div>
 
 <script>
-const ITEMS_KEY = 'stock-items-v3';
-const CATS_KEY = 'stock-categories-v3';
-const LOG_KEY = 'stock-transactions-v3';
+/* ====================================================================
+   STORAGE LAYER
+   เก็บ items / categories / transactions ไว้ใน "คีย์เดียว" (STORE_KEY)
+   แล้ว get/set ทั้งก้อนในครั้งเดียว เพื่อไม่ให้เกิด race condition
+   เวลาบันทึกพร้อมกันหลายอย่าง (ปัญหาเดิม: saveItems()+saveLog() พร้อมกัน
+   ทำให้อีกฝั่งเขียนทับข้อมูลกันเอง เพราะแต่ละอันไป fetch-merge-put แยกกัน)
+   ==================================================================== */
+const STORE_KEY = 'stock-data-v4';
 const DEFAULT_CATS = ['ของใช้ในห้อง','ของใช้ส่วนกลาง','อาหารและเครื่องดื่ม','อุปกรณ์ทำความสะอาด','เครื่องใช้สำนักงาน'];
+
+// ตั้งค่า Google Sheet (SheetDB) ที่เชื่อมต่อไว้เดิม
+const SHEET_API_URL = 'https://sheetdb.io/api/v1/yhupu75kgsqj3';
+const SHEET_ROW_ID = 1;
 
 let items = [];
 let categories = [];
@@ -733,9 +760,9 @@ let transactions = [];
 let editingId = null;
 let sortLowFirst = true;
 let photoBase64 = '';
-let ledgerType = 'in'; 
+let ledgerType = 'in';
 let pendingLines = [];
-let selectedLedgerItem = null; 
+let selectedLedgerItem = null;
 
 const contentEl = document.getElementById('content');
 const statsEl = document.getElementById('stats');
@@ -757,25 +784,94 @@ function formatDateTh(dateStr) {
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
-window.storage = window.storage || {
-  get: async (key) => ({ value: localStorage.getItem(key) }),
-  set: async (key, val) => localStorage.setItem(key, val)
+/* ---------------- Sync status badge ---------------- */
+let lastSyncState = 'local'; // จำสถานะล่าสุดไว้ เผื่อ renderInventory() วาด badge ใหม่ทับ
+function setSyncBadge(state){
+  // state: 'ok' | 'busy' | 'err' | 'local'
+  lastSyncState = state;
+  const el = document.getElementById('syncBadge');
+  if(!el) return;
+  el.classList.remove('ok','busy','err');
+  if(state === 'ok'){ el.classList.add('ok'); el.textContent = '☁️ ซิงค์แล้ว'; }
+  else if(state === 'busy'){ el.classList.add('busy'); el.textContent = '🔄 กำลังซิงค์...'; }
+  else if(state === 'err'){ el.classList.add('err'); el.textContent = '⚠️ ออฟไลน์ (บันทึกในเครื่อง)'; }
+  else{ el.textContent = '💾 เครื่องนี้เท่านั้น'; }
+}
+
+/* ---------------- Storage: SheetDB (คลาวด์) + localStorage (สำรอง) ---------------- */
+const storage = {
+  async get(){
+    try{
+      const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}`);
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const rows = await res.json();
+      if(Array.isArray(rows) && rows.length > 0 && rows[0].data){
+        const parsed = JSON.parse(rows[0].data);
+        localStorage.setItem(STORE_KEY, rows[0].data); // เก็บสำรองไว้ในเครื่องด้วย
+        return parsed;
+      }
+      return null;
+    }catch(e){
+      console.error('โหลดข้อมูลจาก Cloud ไม่สำเร็จ, ใช้ข้อมูลในเครื่องแทน', e);
+      const local = localStorage.getItem(STORE_KEY);
+      return local ? JSON.parse(local) : null;
+    }
+  },
+  async set(dataObj){
+    const json = JSON.stringify(dataObj);
+    localStorage.setItem(STORE_KEY, json); // เซฟในเครื่องก่อนเสมอ กันข้อมูลหาย
+    try{
+      const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}`, {
+        method: 'PUT',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: json })
+      });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      return true;
+    }catch(e){
+      console.error('บันทึกข้อมูลขึ้น Cloud ไม่สำเร็จ (เซฟไว้ในเครื่องแล้ว)', e);
+      return false;
+    }
+  }
 };
 
-async function loadAll(){
+// บันทึกข้อมูลทั้งก้อนในครั้งเดียว (ไม่ race กันแม้เรียกพร้อมกันหลายจุด)
+let saveChain = Promise.resolve();
+function saveAll(){
+  setSyncBadge('busy');
+  // ต่อคิวการเซฟเป็นลำดับ (ไม่ให้ยิง PUT ซ้อนกันเอง)
+  saveChain = saveChain.then(async ()=>{
+    const ok = await storage.set({ items, categories, transactions });
+    setSyncBadge(ok ? 'ok' : 'err');
+    return ok;
+  });
+  return saveChain;
+}
+
+async function loadStockData(){
+  setSyncBadge('busy');
   try{
-    const [ir, cr, lr] = await Promise.all([
-      window.storage.get(ITEMS_KEY, false).catch(()=>null),
-      window.storage.get(CATS_KEY, false).catch(()=>null),
-      window.storage.get(LOG_KEY, false).catch(()=>null)
-    ]);
-    items = ir && ir.value ? JSON.parse(ir.value) : [];
-    categories = cr && cr.value ? JSON.parse(cr.value) : [];
-    transactions = lr && lr.value ? JSON.parse(lr.value) : [];
-    if(categories.length === 0){ categories = [...DEFAULT_CATS]; await saveCats(); }
+    const data = await storage.get();
+    if(data){
+      items = data.items || [];
+      categories = data.categories || [];
+      transactions = data.transactions || [];
+      setSyncBadge('ok');
+    }else{
+      items = []; categories = []; transactions = [];
+      setSyncBadge('err');
+    }
   }catch(e){
-    items = []; categories = [...DEFAULT_CATS]; transactions = [];
+    console.error('โหลดข้อมูลไม่สำเร็จ:', e);
+    items = []; categories = []; transactions = [];
+    setSyncBadge('err');
   }
+
+  if(categories.length === 0){
+    categories = [...DEFAULT_CATS];
+    saveAll();
+  }
+
   document.getElementById('l_date').value = todayStr();
   renderInventory();
   renderCatSelect();
@@ -784,10 +880,6 @@ async function loadAll(){
   renderSummaryOut();
 }
 
-async function saveItems(){ try{ await window.storage.set(ITEMS_KEY, JSON.stringify(items), false); }catch(e){ console.error(e); } }
-async function saveCats(){ try{ await window.storage.set(CATS_KEY, JSON.stringify(categories), false); }catch(e){ console.error(e); } }
-async function saveLog(){ try{ await window.storage.set(LOG_KEY, JSON.stringify(transactions), false); }catch(e){ console.error(e); } }
-
 /* ---------------- Tabs ---------------- */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -795,7 +887,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-    
+
     if(btn.dataset.tab === 'ledger'){ renderLedger(); resetLedgerForm(); }
     if(btn.dataset.tab === 'summary'){ renderSummary(); }
     if(btn.dataset.tab === 'summary-out'){ renderSummaryOut(); }
@@ -829,7 +921,7 @@ function renderCatList(){
   ul.querySelectorAll('button').forEach(b=>{
     b.addEventListener('click', async ()=>{
       categories = categories.filter(c=>c!==b.dataset.cat);
-      await saveCats(); renderCatList(); renderCatSelect();
+      await saveAll(); renderCatList(); renderCatSelect();
     });
   });
 }
@@ -840,7 +932,7 @@ async function addNewCategory(){
   const val = input.value.trim();
   if(!val) return;
   if(!categories.includes(val)) categories.push(val);
-  await saveCats(); input.value=''; renderCatList(); renderCatSelect();
+  await saveAll(); input.value=''; renderCatList(); renderCatSelect();
 }
 
 /* ---------------- Item form (Inventory) ---------------- */
@@ -867,12 +959,42 @@ function updatePhotoPreview(){
   if(photoBase64){ img.src=photoBase64; img.style.display='block'; ph.style.display='none'; }
   else{ img.style.display='none'; ph.style.display='flex'; }
 }
-document.getElementById('f_photo').addEventListener('change', (e)=>{
+
+// บีบอัด/ย่อขนาดรูปก่อนแปลงเป็น base64 กันไม่ให้ข้อมูลใหญ่เกินไปตอนขึ้น Cloud
+function resizeImageToBase64(file, maxDim, quality){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width > height){ height = Math.round(height * (maxDim / width)); width = maxDim; }
+          else{ width = Math.round(width * (maxDim / height)); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('f_photo').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{ photoBase64 = reader.result; updatePhotoPreview(); };
-  reader.readAsDataURL(file);
+  try{
+    photoBase64 = await resizeImageToBase64(file, 300, 0.7);
+    updatePhotoPreview();
+  }catch(err){
+    console.error('ย่อรูปไม่สำเร็จ', err);
+  }
 });
 
 document.getElementById('toggleFormBtn').addEventListener('click', ()=>{
@@ -886,7 +1008,7 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
   let cat = document.getElementById('f_cat').value;
   if(cat === '__new__'){
     cat = document.getElementById('f_cat_new').value.trim();
-    if(cat && !categories.includes(cat)){ categories.push(cat); await saveCats(); }
+    if(cat && !categories.includes(cat)) categories.push(cat);
   }
   const unit = document.getElementById('f_unit').value.trim() || 'ชิ้น';
   const qty = parseFloat(document.getElementById('f_qty').value) || 0;
@@ -903,9 +1025,10 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
   }else{
     items.push({ id: uid(), name, cat, unit, qty, threshold, photo: photoBase64, lastPrice: price||0 });
   }
-  await saveItems();
+  await saveAll();
   closeForm();
   renderInventory();
+  renderCatSelect();
 });
 
 document.getElementById('sortLowBtn').addEventListener('click', ()=>{
@@ -918,7 +1041,7 @@ searchInput.addEventListener('input', renderInventory);
 async function deleteItem(id){
   if(!confirm('ลบของชิ้นนี้ใช่ไหม?')) return;
   items = items.filter(i=>i.id!==id);
-  await saveItems(); renderInventory();
+  await saveAll(); renderInventory();
 }
 
 function renderInventory(){
@@ -927,13 +1050,14 @@ function renderInventory(){
   statsEl.innerHTML = `
     <div class="stat-pill"><b>${total}</b>รายการทั้งหมด</div>
     <div class="stat-pill alert clickable" id="lowStatPill" title="คลิกเพื่อดูรายการใกล้หมดสำหรับส่งไลน์"><b>${lowCount}</b>ใกล้หมด</div>
+    <div class="sync-badge" id="syncBadge">💾</div>
   `;
-  
+
   document.getElementById('lowStatPill').addEventListener('click', openLowStockModal);
 
   const q = searchInput.value.trim().toLowerCase();
   let filtered = items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
-  
+
   if(sortLowFirst){
     filtered.sort((a,b)=>{
       const aLow = a.qty <= a.threshold ? 0 : 1;
@@ -984,6 +1108,7 @@ function renderInventory(){
   });
   html += '</div>';
   contentEl.innerHTML = html;
+  setSyncBadge(lastSyncState); // วาด badge ใหม่ตามสถานะ sync ล่าสุด (element เพิ่งถูกสร้างใหม่ทั้งก้อน)
 }
 
 /* ---------------- Ledger (รับ-จ่าย) ---------------- */
@@ -1052,20 +1177,20 @@ document.addEventListener('click', (e)=>{
 });
 
 function updateLedgerCostPreview(){
-  if(!selectedLedgerItem || ledgerType !== 'in'){ 
-    lCostPreview.classList.remove('show'); 
-    lPriceCompare.classList.remove('show'); 
-    return; 
+  if(!selectedLedgerItem || ledgerType !== 'in'){
+    lCostPreview.classList.remove('show');
+    lPriceCompare.classList.remove('show');
+    return;
   }
   const qty = parseFloat(document.getElementById('l_qty').value) || 0;
   const price = parseFloat(document.getElementById('l_price').value) || 0;
-  if(price <= 0 || qty <= 0){ 
-    lCostPreview.classList.remove('show'); 
-    lPriceCompare.classList.remove('show'); 
-    return; 
+  if(price <= 0 || qty <= 0){
+    lCostPreview.classList.remove('show');
+    lPriceCompare.classList.remove('show');
+    return;
   }
-  
-  const unitPrice = price / qty; 
+
+  const unitPrice = price / qty;
   lCostPreview.innerHTML = `💵 ต้นทุนรวม ${fmt(price)} บาท (ตก ${fmt(unitPrice)} บาท / ${selectedLedgerItem.unit})`;
   lCostPreview.classList.add('show');
 
@@ -1094,7 +1219,7 @@ document.getElementById('addLineBtn').addEventListener('click', ()=>{
   const qty = parseFloat(document.getElementById('l_qty').value) || 0;
   if(qty <= 0){ alert('กรุณาใส่จำนวนมากกว่า 0'); return; }
   const price = ledgerType==='in' ? (parseFloat(document.getElementById('l_price').value) || 0) : 0;
-  
+
   let priceCheckResult = null;
   if(ledgerType === 'in' && price > 0){
     let unitPrice = price / qty;
@@ -1151,7 +1276,7 @@ window.removePending = function(idx){
 document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
   if(pendingLines.length === 0){ alert('ยังไม่มีรายการที่รอบันทึก'); return; }
   const date = document.getElementById('l_date').value || todayStr();
-  
+
   for(let l of pendingLines){
     const it = items.find(i=>i.id===l.itemId);
     if(!it) continue;
@@ -1159,7 +1284,7 @@ document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
     if(l.type === 'in'){
       it.qty += l.qty;
       if(l.price > 0){
-        it.lastPrice = l.price / l.qty; 
+        it.lastPrice = l.price / l.qty;
       }
     } else {
       it.qty = Math.max(0, it.qty - l.qty);
@@ -1178,12 +1303,13 @@ document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
     });
   }
 
-  await Promise.all([saveItems(), saveLog()]);
+  await saveAll();
   pendingLines = [];
   renderPendingLines();
   renderLedger();
   renderInventory();
   renderSummary();
+  renderSummaryOut();
   alert('บันทึกสำเร็จ!');
 });
 
@@ -1191,7 +1317,7 @@ ledgerSearch.addEventListener('input', renderLedger);
 function renderLedger(){
   const q = ledgerSearch.value.trim().toLowerCase();
   const filtered = transactions.filter(t => !q || t.itemName.toLowerCase().includes(q) || t.date.includes(q));
-  
+
   if(filtered.length === 0){
     ledgerBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:30px;">ไม่พบประวัติรายการ</td></tr>`;
     return;
@@ -1212,7 +1338,7 @@ function renderLedger(){
 window.deleteTransaction = async function(id){
   if(!confirm('ต้องการลบประวัติรายการนี้ใช่ไหม? (จำนวนสต๊อกสินค้าจะไม่ถูกย้อนอัตโนมัติ)')) return;
   transactions = transactions.filter(t=>t.id!==id);
-  await saveLog();
+  await saveAll();
   renderLedger();
   renderSummary();
   renderSummaryOut();
@@ -1233,7 +1359,7 @@ function renderSummary(){
   });
 
   const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
-  
+
   let html = '';
   sortedDates.forEach(date=>{
     const list = groups[date];
@@ -1289,7 +1415,7 @@ function renderSummaryOut(){
   });
 
   const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
-  
+
   let html = '';
   sortedDates.forEach(date=>{
     const list = groups[date];
@@ -1347,68 +1473,9 @@ document.getElementById('copyLineBtn').addEventListener('click', ()=>{
     alert('คัดลอกข้อความแล้ว!');
   });
 });
-// ==================== ระบบเชื่อมต่อ Google Sheet (SheetDB) ====================
-const SHEET_API_URL = 'https://sheetdb.io/api/v1/yhupu75kgsqj3';
-
-window.storage = {
-  get: async (key) => {
-    try {
-      const res = await fetch(`${SHEET_API_URL}/id/1`);
-      const rows = await res.json();
-      if(rows.length > 0 && rows[0].data) {
-        const cloudData = JSON.parse(rows[0].data);
-        return { value: cloudData[key] ? JSON.stringify(cloudData[key]) : null };
-      }
-    } catch(e) { console.error("โหลดข้อมูลจาก Cloud ไม่สำเร็จ", e); }
-    return { value: localStorage.getItem(key) };
-  },
-  set: async (key, val) => {
-    try {
-      const res = await fetch(`${SHEET_API_URL}/id/1`);
-      const rows = await res.json();
-      let cloudData = {};
-      if(rows.length > 0 && rows[0].data) {
-        cloudData = JSON.parse(rows[0].data);
-      }
-      cloudData[key] = JSON.parse(val);
-
-      await fetch(`${SHEET_API_URL}/id/1`, {
-        method: 'PUT',
-        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: JSON.stringify(cloudData) })
-      });
-    } catch(e) { console.error("บันทึกข้อมูลขึ้น Cloud ไม่สำเร็จ", e); }
-    localStorage.setItem(key, val);
-  }
-};
-
-async function loadStockData() {
-  try {
-    const [ir, cr, lr] = await Promise.all([
-      window.storage.get('stock-items-v3').catch(() => null),
-      window.storage.get('stock-categories-v3').catch(() => null),
-      window.storage.get('stock-transactions-v3').catch(() => null)
-    ]);
-    
-    items = ir && ir.value ? JSON.parse(ir.value) : [];
-    categories = cr && cr.value ? JSON.parse(cr.value) : [];
-    transactions = lr && lr.value ? JSON.parse(lr.value) : [];
-    
-    renderInventory();
-    if (typeof renderCatSelect === 'function') renderCatSelect();
-    if (typeof renderLedger === 'function') renderLedger();
-    if (typeof renderSummary === 'function') renderSummary();
-    if (typeof renderSummaryOut === 'function') renderSummaryOut();
-    
-  } catch(e) {
-    console.error("โหลดข้อมูลไม่สำเร็จ:", e);
-  }
-}
-// ==============================================================================
 
 // เริ่มต้นโหลดข้อมูล
 loadStockData();
 </script>
 </body>
 </html>
-
