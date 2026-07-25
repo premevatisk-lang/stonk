@@ -821,12 +821,27 @@ const storage = {
     const json = JSON.stringify(dataObj);
     localStorage.setItem(STORE_KEY, json); // เซฟในเครื่องก่อนเสมอ กันข้อมูลหาย
     try{
+      // ลอง PUT (แก้แถวที่ id=1) ก่อน
       const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}`, {
         method: 'PUT',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: json })
       });
       if(!res.ok) throw new Error('HTTP ' + res.status);
+      const result = await res.json().catch(()=>({}));
+
+      // SheetDB จะตอบ 200 OK เสมอแม้ไม่มีแถวให้แก้ (updated: 0) — ต้องเช็คตัวเลขนี้เอง
+      // ไม่งั้นจะดูเหมือน "ซิงค์สำเร็จ" ทั้งที่ไม่ได้เขียนอะไรลงชีตจริงๆ
+      const updatedCount = typeof result.updated === 'number' ? result.updated : null;
+      if(updatedCount === 0){
+        // ยังไม่มีแถว id=1 ในชีต -> สร้างแถวใหม่ด้วย POST แทน
+        const createRes = await fetch(SHEET_API_URL, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: { id: SHEET_ROW_ID, data: json } })
+        });
+        if(!createRes.ok) throw new Error('สร้างแถวใหม่ไม่สำเร็จ: HTTP ' + createRes.status);
+      }
       return true;
     }catch(e){
       console.error('บันทึกข้อมูลขึ้น Cloud ไม่สำเร็จ (เซฟไว้ในเครื่องแล้ว)', e);
