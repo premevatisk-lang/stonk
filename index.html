@@ -1347,9 +1347,20 @@ document.getElementById('copyLineBtn').addEventListener('click', ()=>{
     alert('คัดลอกข้อความแล้ว!');
   });
 });
+document.getElementById('copyLineBtn').addEventListener('click', ()=>{
+  const ta = document.getElementById('lowStockTextarea');
+  ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    alert('คัดลอกข้อความสำหรับส่งไลน์แล้ว!');
+  }).catch(()=>{
+    document.execCommand('copy');
+    alert('คัดลอกข้อความแล้ว!');
+  });
+});
 
 // เริ่มต้นโหลดข้อมูล
-loadAll();
+loadStockData();
 </script>
 </body>
 </html>
+
