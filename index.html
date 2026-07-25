@@ -1347,16 +1347,64 @@ document.getElementById('copyLineBtn').addEventListener('click', ()=>{
     alert('คัดลอกข้อความแล้ว!');
   });
 });
-document.getElementById('copyLineBtn').addEventListener('click', ()=>{
-  const ta = document.getElementById('lowStockTextarea');
-  ta.select();
-  navigator.clipboard.writeText(ta.value).then(()=>{
-    alert('คัดลอกข้อความสำหรับส่งไลน์แล้ว!');
-  }).catch(()=>{
-    document.execCommand('copy');
-    alert('คัดลอกข้อความแล้ว!');
-  });
-});
+// ==================== ระบบเชื่อมต่อ Google Sheet (SheetDB) ====================
+const SHEET_API_URL = 'https://sheetdb.io/api/v1/yhupu75kgsqj3';
+
+window.storage = {
+  get: async (key) => {
+    try {
+      const res = await fetch(`${SHEET_API_URL}/id/1`);
+      const rows = await res.json();
+      if(rows.length > 0 && rows[0].data) {
+        const cloudData = JSON.parse(rows[0].data);
+        return { value: cloudData[key] ? JSON.stringify(cloudData[key]) : null };
+      }
+    } catch(e) { console.error("โหลดข้อมูลจาก Cloud ไม่สำเร็จ", e); }
+    return { value: localStorage.getItem(key) };
+  },
+  set: async (key, val) => {
+    try {
+      const res = await fetch(`${SHEET_API_URL}/id/1`);
+      const rows = await res.json();
+      let cloudData = {};
+      if(rows.length > 0 && rows[0].data) {
+        cloudData = JSON.parse(rows[0].data);
+      }
+      cloudData[key] = JSON.parse(val);
+
+      await fetch(`${SHEET_API_URL}/id/1`, {
+        method: 'PUT',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: JSON.stringify(cloudData) })
+      });
+    } catch(e) { console.error("บันทึกข้อมูลขึ้น Cloud ไม่สำเร็จ", e); }
+    localStorage.setItem(key, val);
+  }
+};
+
+async function loadStockData() {
+  try {
+    const [ir, cr, lr] = await Promise.all([
+      window.storage.get('stock-items-v3').catch(() => null),
+      window.storage.get('stock-categories-v3').catch(() => null),
+      window.storage.get('stock-transactions-v3').catch(() => null)
+    ]);
+    
+    items = ir && ir.value ? JSON.parse(ir.value) : [];
+    categories = cr && cr.value ? JSON.parse(cr.value) : [];
+    transactions = lr && lr.value ? JSON.parse(lr.value) : [];
+    
+    renderInventory();
+    if (typeof renderCatSelect === 'function') renderCatSelect();
+    if (typeof renderLedger === 'function') renderLedger();
+    if (typeof renderSummary === 'function') renderSummary();
+    if (typeof renderSummaryOut === 'function') renderSummaryOut();
+    
+  } catch(e) {
+    console.error("โหลดข้อมูลไม่สำเร็จ:", e);
+  }
+}
+// ==============================================================================
 
 // เริ่มต้นโหลดข้อมูล
 loadStockData();
