@@ -783,17 +783,15 @@ const storage = {
     const json = JSON.stringify(dataObj);
     localStorage.setItem(STORE_KEY, json); // เซฟในเครื่องก่อนเสมอ กันข้อมูลหาย
     try{
-      // แก้บั๊ก: เดิมใช้ PUT เพื่อไปแก้แถว id=1 ตรงๆ แต่ PUT ไม่ใช่ "simple request"
-      // ไม่ว่าจะตั้ง Content-Type เป็นอะไรก็ตาม เบราว์เซอร์จะส่ง CORS preflight (OPTIONS)
-      // ก่อนเสมอ และ SheetDB ตอบ preflight นี้ผิดพลาดเป็น 405 ทำให้ PUT ใช้งานจริงไม่ได้เลย
-      // (โหลดข้อมูล/GET ไม่เจอปัญหานี้เพราะ GET ไม่ต้อง preflight — เลยดูเหมือน "ซิงค์แล้ว"
-      // ตอนเปิดแอป แต่พอกดบันทึกของใหม่ทีไรกลายเป็น "ออฟไลน์" ทุกที)
-      // ทางแก้: เลิกใช้ PUT ไปเลย ใช้ POST สร้างแถวใหม่ทุกครั้งที่บันทึก (POST + Content-Type:
-      // text/plain ยังนับเป็น simple request จริงๆ จึงไม่ต้อง preflight และใช้งานได้)
-      // แล้วตอนโหลดข้อมูล (get) ค่อยดึง "แถวล่าสุด" มาใช้แทน
+      // แก้บั๊กรอบ 2: เดิมส่ง Content-Type: text/plain เพื่อหวังเลี่ยง CORS preflight
+      // แต่ผลข้างเคียงคือ SheetDB (เซิร์ฟเวอร์ฝั่งนั้น) อ่าน body ไม่ออกว่าเป็น JSON เลย
+      // ทำให้ request "ไปถึง" เซิร์ฟเวอร์จริง (เห็นใน usage log) แต่ข้อมูลที่เขียนกลายเป็น
+      // ค่าว่าง/ผิดรูปแบบ (ในชีตจริงเจอค่า "{}" ว่างเปล่า ทั้งที่กดบันทึกของไปหลายรายการแล้ว)
+      // ทางแก้ที่ถูกต้อง: ใช้ Content-Type: application/json ตามมาตรฐานจริง — SheetDB
+      // รองรับ CORS preflight (OPTIONS) ของ POST อยู่แล้วตามปกติสำหรับการใช้งานจากเบราว์เซอร์
       const res = await fetch(SHEET_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { id: SHEET_ROW_ID, data: json } })
       });
       if(!res.ok) throw new Error('HTTP ' + res.status);
