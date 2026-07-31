@@ -6,7 +6,6 @@
 <title>สต๊อกของ — @prem hotel</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Chonburi&family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
-
 :root{
   --paper:#F5EFDE;
   --paper-line:#E4D9BB;
@@ -34,7 +33,6 @@ body{
   padding:20px 14px 60px;
 }
 .wrap{max-width:920px;margin:0 auto;}
-
 header.top{
   display:flex;
   align-items:flex-end;
@@ -75,7 +73,6 @@ h1{
   box-shadow:var(--shadow);
   border-color:var(--teal);
 }
-
 .sync-badge{
   font-family:'JetBrains Mono',monospace;
   font-size:11px;
@@ -92,7 +89,6 @@ h1{
 .sync-badge.ok{border-color:var(--green-in);color:var(--green-in);background:var(--green-in-bg);}
 .sync-badge.err{border-color:var(--stamp-red);color:var(--stamp-red);background:var(--stamp-red-bg);}
 .sync-badge.busy{border-color:var(--brass);color:var(--brass);background:#FBF3E1;}
-
 .tabs{
   display:flex;
   gap:6px;
@@ -116,7 +112,6 @@ h1{
 .tab-btn.active{color:var(--teal-dark);border-bottom-color:var(--teal);}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
-
 .toolbar{
   display:flex;
   gap:10px;
@@ -169,7 +164,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
   padding:6px 8px;font-size:13px;color:var(--ink);
 }
 .btn-icon-sm:hover{background:rgba(43,58,66,0.06);}
-
 .form-card{
   background:var(--card-bg);
   border:1.5px solid var(--ink);
@@ -243,7 +237,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
   border-top:1px dashed #D8CBA4;
   padding-top:10px;
 }
-
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
@@ -301,7 +294,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
   padding:2px 4px;
 }
 .icon-btn:hover{color:var(--stamp-red);}
-
 .stamp{
   position:absolute;
   top:10px;
@@ -320,7 +312,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
   box-shadow: inset 0 0 0 1.5px var(--stamp-red);
   mix-blend-mode:multiply;
 }
-
 .empty{
   text-align:center;
   padding:50px 20px;
@@ -328,9 +319,7 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
   font-size:14px;
 }
 .empty b{display:block;font-family:'Chonburi',cursive;font-size:20px;color:var(--teal-dark);margin-bottom:6px;}
-
 .loading{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14px;}
-
 /* Ledger Table */
 .ledger-form{
   background:var(--card-bg);
@@ -363,7 +352,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
 }
 .type-btn.in.active{background:var(--green-in-bg);border-color:var(--green-in);color:var(--green-in);}
 .type-btn.out.active{background:var(--stamp-red-bg);border-color:var(--stamp-red);color:var(--stamp-red);}
-
 .cost-preview{
   grid-column:1/-1;
   font-family:'JetBrains Mono',monospace;
@@ -377,7 +365,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
   line-height:1.6;
 }
 .cost-preview.show{display:block;}
-
 .price-compare-box{
   grid-column:1/-1;
   font-family:'JetBrains Mono',monospace;
@@ -391,7 +378,6 @@ button:disabled{opacity:0.55;cursor:not-allowed;transform:none;}
 .price-compare-box.cheaper{background:#EAF3E8;border:1px dashed var(--green-in);color:var(--green-in);}
 .price-compare-box.dearer{background:var(--stamp-red-bg);border:1px dashed var(--stamp-red);color:var(--stamp-red);}
 .price-compare-box.equal{background:#FBF3E1;border:1px dashed var(--brass);color:var(--brass);}
-
 .ledger-table-wrap{
   background:var(--card-bg);
   border:1.5px solid var(--ink);
@@ -427,7 +413,6 @@ table.ledger tr:last-child td{border-bottom:none;}
 .ledger-cost{color:var(--brass);font-size:12px;font-family:'JetBrains Mono',monospace;}
 .ledger-del{background:none;border:none;color:var(--ink-soft);font-size:13px;cursor:pointer;}
 .ledger-del:hover{color:var(--stamp-red);}
-
 .summary-card {
   background: var(--card-bg);
   border: 1.5px solid var(--ink);
@@ -464,7 +449,6 @@ table.ledger tr:last-child td{border-bottom:none;}
   background: var(--green-in-bg);
   border: 1px solid var(--green-in);
 }
-
 .diff-badge {
   display: inline-block;
   font-size: 10.5px;
@@ -476,7 +460,6 @@ table.ledger tr:last-child td{border-bottom:none;}
 .diff-badge.cheaper { background: #EAF3E8; color: var(--green-in); border: 1px solid #c5e1c5; }
 .diff-badge.dearer { background: var(--stamp-red-bg); color: var(--stamp-red); border: 1px solid #f5c2bc; }
 .diff-badge.equal { background: #FBF3E1; color: var(--brass); border: 1px solid #edd9af; }
-
 .modal-overlay{
   display:none;
   position:fixed;inset:0;
@@ -513,7 +496,6 @@ table.ledger tr:last-child td{border-bottom:none;}
 .modal-add-row{display:flex;gap:6px;}
 .modal-add-row input{flex:1;padding:8px 10px;border:1.3px solid #C9BE9C;border-radius:3px;font-size:13px;}
 .modal-close-row{text-align:right;margin-top:12px;}
-
 .autocomplete-wrap { position: relative; width: 100%; }
 .autocomplete-list {
   position: absolute;
@@ -539,7 +521,6 @@ table.ledger tr:last-child td{border-bottom:none;}
 .autocomplete-list li:last-child { border-bottom: none; }
 .autocomplete-list li:hover { background: var(--paper-line); color: var(--teal-dark); }
 .autocomplete-hint { font-size: 11px; color: var(--ink-soft); display: block; }
-
 .line-preview-box {
   width: 100%;
   height: 140px;
@@ -564,14 +545,12 @@ table.ledger tr:last-child td{border-bottom:none;}
     </div>
     <div class="stats" id="stats"></div>
   </header>
-
   <div class="tabs">
     <button class="tab-btn active" data-tab="inventory">📦 คลังของ</button>
     <button class="tab-btn" data-tab="ledger">📒 บันทึกรับ-จ่าย</button>
     <button class="tab-btn" data-tab="summary">📅 สรุปรับเข้า</button>
     <button class="tab-btn" data-tab="summary-out">📤 สรุปเบิกจ่าย</button>
   </div>
-
   <!-- หน้าคลังสินค้า -->
   <div class="tab-panel active" id="tab-inventory">
     <div class="toolbar">
@@ -579,7 +558,6 @@ table.ledger tr:last-child td{border-bottom:none;}
       <button class="btn-ghost btn-sort active" id="sortLowBtn">⚠ ของใกล้หมดก่อน</button>
       <button class="btn-primary" id="toggleFormBtn">+ เพิ่มของ</button>
     </div>
-
     <div class="form-card" id="formCard">
       <h2 id="formTitle">เพิ่มของใหม่</h2>
       <div class="form-grid">
@@ -598,7 +576,7 @@ table.ledger tr:last-child td{border-bottom:none;}
           <label>&nbsp;</label>
           <button type="button" class="btn-icon-sm" id="catSettingsBtn" style="width:100%;padding:9px;">⚙ จัดการหมวดหมู่</button>
         </div>
-        
+
         <div class="field">
           <label>หน่วยนับ</label>
           <input type="text" id="f_unit" placeholder="เช่น แพ็ค, ชิ้น, ลัง, ขวด">
@@ -612,13 +590,11 @@ table.ledger tr:last-child td{border-bottom:none;}
           <input type="number" id="f_threshold" min="0" value="2">
         </div>
         <div class="field"></div>
-
         <div class="section-label">ข้อมูลราคา</div>
         <div class="field full">
           <label>ราคาซื้อล่าสุดต่อ 1 หน่วย (บาท)</label>
           <input type="number" id="f_price" min="0" step="0.01" placeholder="เช่น ราคาต่อชิ้น หรือต่อแพ็ค">
         </div>
-
         <div class="photo-row">
           <img id="photoPreview" class="photo-preview" src="" alt="" style="display:none;">
           <div class="photo-preview" id="photoPlaceholder" style="display:flex;align-items:center;justify-content:center;font-size:22px;">📷</div>
@@ -630,10 +606,8 @@ table.ledger tr:last-child td{border-bottom:none;}
         <button class="btn-primary" id="saveBtn">บันทึก</button>
       </div>
     </div>
-
     <div id="content"><div class="loading">กำลังโหลดข้อมูล...</div></div>
   </div>
-
   <!-- หน้าบันทึกรับ-จ่าย -->
   <div class="tab-panel" id="tab-ledger">
     <div class="ledger-form">
@@ -647,9 +621,7 @@ table.ledger tr:last-child td{border-bottom:none;}
           <label>วันที่</label>
           <input type="date" id="l_date">
         </div>
-
         <div class="section-label" style="margin-top:0;">เลือกรายการและระบุจำนวนที่ต้องการทำรายการ</div>
-
         <div class="field full">
           <label>ค้นหาของ (พิมพ์ชื่อของ)</label>
           <div class="autocomplete-wrap">
@@ -671,7 +643,6 @@ table.ledger tr:last-child td{border-bottom:none;}
           <button type="button" class="btn-ghost" id="addLineBtn" style="width:100%;">+ เพิ่มรายการนี้ลงในบันทึก</button>
         </div>
       </div>
-
       <div id="pendingWrap" style="display:none;margin-top:14px;">
         <div class="section-label" style="margin-top:0;">รายการที่รอบันทึก</div>
         <div class="ledger-table-wrap" style="margin-top:8px;">
@@ -681,16 +652,13 @@ table.ledger tr:last-child td{border-bottom:none;}
           </table>
         </div>
       </div>
-
       <div class="form-actions">
         <button class="btn-primary" id="logSaveBtn">บันทึกทั้งหมด</button>
       </div>
     </div>
-
     <div class="toolbar">
       <input type="text" class="search" id="ledgerSearch" placeholder="🔍 ค้นหาในประวัติ...">
     </div>
-
     <div class="ledger-table-wrap">
       <table class="ledger" id="ledgerTable">
         <thead>
@@ -700,18 +668,15 @@ table.ledger tr:last-child td{border-bottom:none;}
       </table>
     </div>
   </div>
-
   <!-- หน้าสรุปรับเข้า -->
   <div class="tab-panel" id="tab-summary">
     <div id="summaryContent"><div class="loading">กำลังโหลดข้อมูล...</div></div>
   </div>
-
   <!-- หน้าสรุปเบิกจ่าย -->
   <div class="tab-panel" id="tab-summary-out">
     <div id="summaryOutContent"><div class="loading">กำลังโหลดข้อมูล...</div></div>
   </div>
 </div>
-
 <!-- Modal จัดการหมวดหมู่ -->
 <div class="modal-overlay" id="catModal">
   <div class="modal-box">
@@ -726,7 +691,6 @@ table.ledger tr:last-child td{border-bottom:none;}
     </div>
   </div>
 </div>
-
 <!-- Modal รายการใกล้หมดสำหรับก๊อปปี้ส่งไลน์ -->
 <div class="modal-overlay" id="lowStockModal">
   <div class="modal-box" style="max-width:420px;">
@@ -738,7 +702,6 @@ table.ledger tr:last-child td{border-bottom:none;}
     </div>
   </div>
 </div>
-
 <script>
 /* ====================================================================
    STORAGE LAYER
@@ -749,11 +712,9 @@ table.ledger tr:last-child td{border-bottom:none;}
    ==================================================================== */
 const STORE_KEY = 'stock-data-v4';
 const DEFAULT_CATS = ['ของใช้ในห้อง','ของใช้ส่วนกลาง','อาหารและเครื่องดื่ม','อุปกรณ์ทำความสะอาด','เครื่องใช้สำนักงาน'];
-
 // ตั้งค่า Google Sheet (SheetDB) ที่เชื่อมต่อไว้เดิม
 const SHEET_API_URL = 'https://sheetdb.io/api/v1/yhupu75kgsqj3';
 const SHEET_ROW_ID = 1;
-
 let items = [];
 let categories = [];
 let transactions = [];
@@ -763,7 +724,6 @@ let photoBase64 = '';
 let ledgerType = 'in';
 let pendingLines = [];
 let selectedLedgerItem = null;
-
 const contentEl = document.getElementById('content');
 const statsEl = document.getElementById('stats');
 const formCard = document.getElementById('formCard');
@@ -772,7 +732,6 @@ const ledgerSearch = document.getElementById('ledgerSearch');
 const ledgerBody = document.getElementById('ledgerBody');
 const summaryContent = document.getElementById('summaryContent');
 const summaryOutContent = document.getElementById('summaryOutContent');
-
 function uid(){ return 'i' + Date.now() + Math.random().toString(36).slice(2,7); }
 function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -783,7 +742,6 @@ function formatDateTh(dateStr) {
   if(parts.length !== 3) return dateStr;
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
-
 /* ---------------- Sync status badge ---------------- */
 let lastSyncState = 'local'; // จำสถานะล่าสุดไว้ เผื่อ renderInventory() วาด badge ใหม่ทับ
 function setSyncBadge(state){
@@ -797,7 +755,6 @@ function setSyncBadge(state){
   else if(state === 'err'){ el.classList.add('err'); el.textContent = '⚠️ ออฟไลน์ (บันทึกในเครื่อง)'; }
   else{ el.textContent = '💾 เครื่องนี้เท่านั้น'; }
 }
-
 /* ---------------- Storage: SheetDB (คลาวด์) + localStorage (สำรอง) ---------------- */
 const storage = {
   async get(){
@@ -805,10 +762,15 @@ const storage = {
       const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}`);
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const rows = await res.json();
-      if(Array.isArray(rows) && rows.length > 0 && rows[0].data){
-        const parsed = JSON.parse(rows[0].data);
-        localStorage.setItem(STORE_KEY, rows[0].data); // เก็บสำรองไว้ในเครื่องด้วย
-        return parsed;
+      // เนื่องจากตอนนี้บันทึกด้วย POST เพิ่มแถวใหม่ทุกครั้ง (ดูเหตุผลใน set() ด้านล่าง)
+      // อาจมีหลายแถวที่ id=1 สะสมอยู่ ต้องเอา "แถวล่าสุด" (ตัวท้ายสุดของอาเรย์) มาใช้เสมอ
+      if(Array.isArray(rows) && rows.length > 0){
+        const latest = rows[rows.length - 1];
+        if(latest && latest.data){
+          const parsed = JSON.parse(latest.data);
+          localStorage.setItem(STORE_KEY, latest.data); // เก็บสำรองไว้ในเครื่องด้วย
+          return parsed;
+        }
       }
       return null;
     }catch(e){
@@ -821,32 +783,20 @@ const storage = {
     const json = JSON.stringify(dataObj);
     localStorage.setItem(STORE_KEY, json); // เซฟในเครื่องก่อนเสมอ กันข้อมูลหาย
     try{
-      // ลอง PUT (แก้แถวที่ id=1) ก่อน
-      // หมายเหตุ: ใช้ Content-Type: text/plain (ไม่ใช่ application/json) เพื่อเลี่ยงไม่ให้
-      // เบราว์เซอร์ส่ง CORS preflight (OPTIONS) ก่อน — บาง API เช่น SheetDB จัดการ OPTIONS
-      // ไม่ถูกต้องแล้วตอบกลับเป็น 405 ทั้งที่ตัว endpoint จริงรองรับ PUT อยู่แล้ว
-      // ตัว body ยังเป็น JSON string เหมือนเดิม เซิร์ฟเวอร์ฝั่ง SheetDB จะ parse เป็น JSON ให้เอง
-      const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}`, {
-        method: 'PUT',
+      // แก้บั๊ก: เดิมใช้ PUT เพื่อไปแก้แถว id=1 ตรงๆ แต่ PUT ไม่ใช่ "simple request"
+      // ไม่ว่าจะตั้ง Content-Type เป็นอะไรก็ตาม เบราว์เซอร์จะส่ง CORS preflight (OPTIONS)
+      // ก่อนเสมอ และ SheetDB ตอบ preflight นี้ผิดพลาดเป็น 405 ทำให้ PUT ใช้งานจริงไม่ได้เลย
+      // (โหลดข้อมูล/GET ไม่เจอปัญหานี้เพราะ GET ไม่ต้อง preflight — เลยดูเหมือน "ซิงค์แล้ว"
+      // ตอนเปิดแอป แต่พอกดบันทึกของใหม่ทีไรกลายเป็น "ออฟไลน์" ทุกที)
+      // ทางแก้: เลิกใช้ PUT ไปเลย ใช้ POST สร้างแถวใหม่ทุกครั้งที่บันทึก (POST + Content-Type:
+      // text/plain ยังนับเป็น simple request จริงๆ จึงไม่ต้อง preflight และใช้งานได้)
+      // แล้วตอนโหลดข้อมูล (get) ค่อยดึง "แถวล่าสุด" มาใช้แทน
+      const res = await fetch(SHEET_API_URL, {
+        method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
-        // แก้บั๊ก: data ต้องเป็น object ที่ระบุ "ชื่อคอลัมน์: ค่า" ไม่ใช่ string เปล่าๆ
-        body: JSON.stringify({ data: { data: json } })
+        body: JSON.stringify({ data: { id: SHEET_ROW_ID, data: json } })
       });
       if(!res.ok) throw new Error('HTTP ' + res.status);
-      const result = await res.json().catch(()=>({}));
-
-      // SheetDB จะตอบ 200 OK เสมอแม้ไม่มีแถวให้แก้ (updated: 0) — ต้องเช็คตัวเลขนี้เอง
-      // ไม่งั้นจะดูเหมือน "ซิงค์สำเร็จ" ทั้งที่ไม่ได้เขียนอะไรลงชีตจริงๆ
-      const updatedCount = typeof result.updated === 'number' ? result.updated : null;
-      if(updatedCount === 0){
-        // ยังไม่มีแถว id=1 ในชีต -> สร้างแถวใหม่ด้วย POST แทน
-        const createRes = await fetch(SHEET_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ data: { id: SHEET_ROW_ID, data: json } })
-        });
-        if(!createRes.ok) throw new Error('สร้างแถวใหม่ไม่สำเร็จ: HTTP ' + createRes.status);
-      }
       return true;
     }catch(e){
       console.error('บันทึกข้อมูลขึ้น Cloud ไม่สำเร็จ (เซฟไว้ในเครื่องแล้ว)', e);
@@ -854,7 +804,6 @@ const storage = {
     }
   }
 };
-
 // บันทึกข้อมูลทั้งก้อนในครั้งเดียว (ไม่ race กันแม้เรียกพร้อมกันหลายจุด)
 let saveChain = Promise.resolve();
 function saveAll(){
@@ -867,7 +816,6 @@ function saveAll(){
   });
   return saveChain;
 }
-
 async function loadStockData(){
   setSyncBadge('busy');
   try{
@@ -886,12 +834,10 @@ async function loadStockData(){
     items = []; categories = []; transactions = [];
     setSyncBadge('err');
   }
-
   if(categories.length === 0){
     categories = [...DEFAULT_CATS];
     saveAll();
   }
-
   document.getElementById('l_date').value = todayStr();
   renderInventory();
   renderCatSelect();
@@ -899,7 +845,6 @@ async function loadStockData(){
   renderSummary();
   renderSummaryOut();
 }
-
 /* ---------------- Tabs ---------------- */
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -907,13 +852,11 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-
     if(btn.dataset.tab === 'ledger'){ renderLedger(); resetLedgerForm(); }
     if(btn.dataset.tab === 'summary'){ renderSummary(); }
     if(btn.dataset.tab === 'summary-out'){ renderSummaryOut(); }
   });
 });
-
 /* ---------------- Category ---------------- */
 function renderCatSelect(keepValue){
   const sel = document.getElementById('f_cat');
@@ -928,12 +871,10 @@ function toggleCatNewInput(){
   const sel = document.getElementById('f_cat');
   document.getElementById('catNewWrap').classList.toggle('show', sel.value === '__new__');
 }
-
 const catModal = document.getElementById('catModal');
 document.getElementById('catSettingsBtn').addEventListener('click', ()=>{ renderCatList(); catModal.classList.add('open'); });
 document.getElementById('closeCatModalBtn').addEventListener('click', ()=> catModal.classList.remove('open'));
 catModal.addEventListener('click', (e)=>{ if(e.target===catModal) catModal.classList.remove('open'); });
-
 function renderCatList(){
   const ul = document.getElementById('catListEl');
   if(categories.length === 0){ ul.innerHTML = '<li style="color:var(--ink-soft);">ยังไม่มีหมวดหมู่</li>'; return; }
@@ -954,7 +895,6 @@ async function addNewCategory(){
   if(!categories.includes(val)) categories.push(val);
   await saveAll(); input.value=''; renderCatList(); renderCatSelect();
 }
-
 /* ---------------- Item form (Inventory) ---------------- */
 function openForm(item){
   editingId = item ? item.id : null;
@@ -979,7 +919,6 @@ function updatePhotoPreview(){
   if(photoBase64){ img.src=photoBase64; img.style.display='block'; ph.style.display='none'; }
   else{ img.style.display='none'; ph.style.display='flex'; }
 }
-
 // บีบอัด/ย่อขนาดรูปก่อนแปลงเป็น base64 กันไม่ให้ข้อมูลใหญ่เกินไปตอนขึ้น Cloud
 function resizeImageToBase64(file, maxDim, quality){
   return new Promise((resolve, reject)=>{
@@ -1005,7 +944,6 @@ function resizeImageToBase64(file, maxDim, quality){
     reader.readAsDataURL(file);
   });
 }
-
 document.getElementById('f_photo').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   if(!file) return;
@@ -1016,12 +954,10 @@ document.getElementById('f_photo').addEventListener('change', async (e)=>{
     console.error('ย่อรูปไม่สำเร็จ', err);
   }
 });
-
 document.getElementById('toggleFormBtn').addEventListener('click', ()=>{
   if(formCard.classList.contains('open') && !editingId) closeForm(); else openForm(null);
 });
 document.getElementById('cancelFormBtn').addEventListener('click', closeForm);
-
 document.getElementById('saveBtn').addEventListener('click', async ()=>{
   const name = document.getElementById('f_name').value.trim();
   if(!name){ alert('กรุณาใส่ชื่อของ'); return; }
@@ -1034,7 +970,6 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
   const qty = parseFloat(document.getElementById('f_qty').value) || 0;
   const threshold = parseFloat(document.getElementById('f_threshold').value) || 0;
   const price = parseFloat(document.getElementById('f_price').value) || 0;
-
   if(editingId){
     const it = items.find(i=>i.id===editingId);
     if(it){
@@ -1050,20 +985,17 @@ document.getElementById('saveBtn').addEventListener('click', async ()=>{
   renderInventory();
   renderCatSelect();
 });
-
 document.getElementById('sortLowBtn').addEventListener('click', ()=>{
   sortLowFirst = !sortLowFirst;
   document.getElementById('sortLowBtn').classList.toggle('active', sortLowFirst);
   renderInventory();
 });
 searchInput.addEventListener('input', renderInventory);
-
 async function deleteItem(id){
   if(!confirm('ลบของชิ้นนี้ใช่ไหม?')) return;
   items = items.filter(i=>i.id!==id);
   await saveAll(); renderInventory();
 }
-
 function renderInventory(){
   const total = items.length;
   const lowCount = items.filter(i=>i.qty <= i.threshold).length;
@@ -1072,12 +1004,9 @@ function renderInventory(){
     <div class="stat-pill alert clickable" id="lowStatPill" title="คลิกเพื่อดูรายการใกล้หมดสำหรับส่งไลน์"><b>${lowCount}</b>ใกล้หมด</div>
     <div class="sync-badge" id="syncBadge">💾</div>
   `;
-
   document.getElementById('lowStatPill').addEventListener('click', openLowStockModal);
-
   const q = searchInput.value.trim().toLowerCase();
   let filtered = items.filter(i => !q || i.name.toLowerCase().includes(q) || (i.cat||'').toLowerCase().includes(q));
-
   if(sortLowFirst){
     filtered.sort((a,b)=>{
       const aLow = a.qty <= a.threshold ? 0 : 1;
@@ -1088,18 +1017,15 @@ function renderInventory(){
   } else {
     filtered.sort((a,b)=>a.name.localeCompare(b.name, 'th'));
   }
-
   if(filtered.length === 0){
     contentEl.innerHTML = `<div class="empty"><b>ไม่พบรายการของ</b>ลองค้นหาใหม่ หรือกดเพิ่มของ</div>`;
     return;
   }
-
   let html = '<div class="grid">';
   filtered.forEach(item=>{
     const isLow = item.qty <= item.threshold;
     let photoHtml = item.photo ? `<img class="card-photo" src="${item.photo}" alt="" loading="lazy">` : `<div class="card-photo placeholder">📦</div>`;
     if(isLow) photoHtml += `<div class="stamp">ใกล้หมด</div>`;
-
     html += `
     <div class="card ${isLow?'low':''}">
       ${photoHtml}
@@ -1130,7 +1056,6 @@ function renderInventory(){
   contentEl.innerHTML = html;
   setSyncBadge(lastSyncState); // วาด badge ใหม่ตามสถานะ sync ล่าสุด (element เพิ่งถูกสร้างใหม่ทั้งก้อน)
 }
-
 /* ---------------- Ledger (รับ-จ่าย) ---------------- */
 const typeInBtn = document.getElementById('typeInBtn');
 const typeOutBtn = document.getElementById('typeOutBtn');
@@ -1139,10 +1064,8 @@ const lItemList = document.getElementById('l_item_list');
 const lPriceWrap = document.getElementById('l_priceWrap');
 const lCostPreview = document.getElementById('l_costPreview');
 const lPriceCompare = document.getElementById('l_priceCompare');
-
 typeInBtn.addEventListener('click', ()=>setLedgerType('in'));
 typeOutBtn.addEventListener('click', ()=>setLedgerType('out'));
-
 function setLedgerType(t){
   ledgerType = t;
   typeInBtn.classList.toggle('active', t==='in');
@@ -1150,7 +1073,6 @@ function setLedgerType(t){
   lPriceWrap.style.display = t==='in' ? 'block' : 'none';
   updateLedgerCostPreview();
 }
-
 function resetLedgerForm(){
   selectedLedgerItem = null;
   lItemSearch.value = '';
@@ -1160,7 +1082,6 @@ function resetLedgerForm(){
   renderPendingLines();
   updateLedgerCostPreview();
 }
-
 lItemSearch.addEventListener('input', ()=>{
   const q = lItemSearch.value.trim().toLowerCase();
   if(!q){ lItemList.classList.remove('show'); return; }
@@ -1173,7 +1094,6 @@ lItemSearch.addEventListener('input', ()=>{
   `).join('');
   lItemList.classList.add('show');
 });
-
 lItemList.addEventListener('click', (e)=>{
   const li = e.target.closest('li');
   if(!li || !li.dataset.id) return;
@@ -1185,17 +1105,14 @@ lItemList.addEventListener('click', (e)=>{
     updateLedgerCostPreview();
   }
 });
-
 document.addEventListener('click', (e)=>{
   if(!lItemSearch.contains(e.target) && !lItemList.contains(e.target)){
     lItemList.classList.remove('show');
   }
 });
-
 ['l_qty','l_price'].forEach(id=>{
   document.getElementById(id).addEventListener('input', updateLedgerCostPreview);
 });
-
 function updateLedgerCostPreview(){
   if(!selectedLedgerItem || ledgerType !== 'in'){
     lCostPreview.classList.remove('show');
@@ -1209,11 +1126,9 @@ function updateLedgerCostPreview(){
     lPriceCompare.classList.remove('show');
     return;
   }
-
   const unitPrice = price / qty;
   lCostPreview.innerHTML = `💵 ต้นทุนรวม ${fmt(price)} บาท (ตก ${fmt(unitPrice)} บาท / ${selectedLedgerItem.unit})`;
   lCostPreview.classList.add('show');
-
   const oldPrice = selectedLedgerItem.lastPrice || 0;
   if(oldPrice > 0){
     const diff = unitPrice - oldPrice;
@@ -1233,13 +1148,11 @@ function updateLedgerCostPreview(){
     lPriceCompare.innerHTML = `💡 บันทึกราคาซื้อตั้งต้นครั้งแรกสำหรับรายการนี้`;
   }
 }
-
 document.getElementById('addLineBtn').addEventListener('click', ()=>{
   if(!selectedLedgerItem){ alert('กรุณาเลือกของจากช่องค้นหาก่อน'); lItemSearch.focus(); return; }
   const qty = parseFloat(document.getElementById('l_qty').value) || 0;
   if(qty <= 0){ alert('กรุณาใส่จำนวนมากกว่า 0'); return; }
   const price = ledgerType==='in' ? (parseFloat(document.getElementById('l_price').value) || 0) : 0;
-
   let priceCheckResult = null;
   if(ledgerType === 'in' && price > 0){
     let unitPrice = price / qty;
@@ -1254,7 +1167,6 @@ document.getElementById('addLineBtn').addEventListener('click', ()=>{
       priceCheckResult = {type: 'equal', text: `ราคาตั้งต้น`, diff: 0};
     }
   }
-
   pendingLines.push({
     id: uid(),
     itemId: selectedLedgerItem.id,
@@ -1273,7 +1185,6 @@ document.getElementById('addLineBtn').addEventListener('click', ()=>{
   lCostPreview.classList.remove('show');
   lPriceCompare.classList.remove('show');
 });
-
 function renderPendingLines(){
   const wrap = document.getElementById('pendingWrap');
   const body = document.getElementById('pendingBody');
@@ -1292,15 +1203,12 @@ window.removePending = function(idx){
   pendingLines.splice(idx, 1);
   renderPendingLines();
 };
-
 document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
   if(pendingLines.length === 0){ alert('ยังไม่มีรายการที่รอบันทึก'); return; }
   const date = document.getElementById('l_date').value || todayStr();
-
   for(let l of pendingLines){
     const it = items.find(i=>i.id===l.itemId);
     if(!it) continue;
-
     if(l.type === 'in'){
       it.qty += l.qty;
       if(l.price > 0){
@@ -1309,7 +1217,6 @@ document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
     } else {
       it.qty = Math.max(0, it.qty - l.qty);
     }
-
     transactions.unshift({
       id: uid(),
       date,
@@ -1322,7 +1229,6 @@ document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
       priceCheck: l.priceCheck
     });
   }
-
   await saveAll();
   pendingLines = [];
   renderPendingLines();
@@ -1332,17 +1238,14 @@ document.getElementById('logSaveBtn').addEventListener('click', async ()=>{
   renderSummaryOut();
   alert('บันทึกสำเร็จ!');
 });
-
 ledgerSearch.addEventListener('input', renderLedger);
 function renderLedger(){
   const q = ledgerSearch.value.trim().toLowerCase();
   const filtered = transactions.filter(t => !q || t.itemName.toLowerCase().includes(q) || t.date.includes(q));
-
   if(filtered.length === 0){
     ledgerBody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--ink-soft);padding:30px;">ไม่พบประวัติรายการ</td></tr>`;
     return;
   }
-
   ledgerBody.innerHTML = filtered.map(t=>`
     <tr>
       <td style="font-family:'JetBrains Mono',monospace;font-size:12px;">${formatDateTh(t.date)}</td>
@@ -1354,7 +1257,6 @@ function renderLedger(){
       </tr>
   `).join('');
 }
-
 window.deleteTransaction = async function(id){
   if(!confirm('ต้องการลบประวัติรายการนี้ใช่ไหม? (จำนวนสต๊อกสินค้าจะไม่ถูกย้อนอัตโนมัติ)')) return;
   transactions = transactions.filter(t=>t.id!==id);
@@ -1363,7 +1265,6 @@ window.deleteTransaction = async function(id){
   renderSummary();
   renderSummaryOut();
 };
-
 /* ---------------- Summary (สรุปรับเข้าแยกตามวัน) ---------------- */
 function renderSummary(){
   const ins = transactions.filter(t=>t.type==='in');
@@ -1371,20 +1272,16 @@ function renderSummary(){
     summaryContent.innerHTML = `<div class="empty"><b>ยังไม่มีข้อมูลรับเข้า</b>เริ่มบันทึกรับเข้าสินค้าได้ที่หน้าบันทึกรับ-จ่าย</div>`;
     return;
   }
-
   const groups = {};
   ins.forEach(t=>{
     if(!groups[t.date]) groups[t.date] = [];
     groups[t.date].push(t);
   });
-
   const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
-
   let html = '';
   sortedDates.forEach(date=>{
     const list = groups[date];
     let dayTotal = list.reduce((sum, t)=>sum + (t.price||0), 0);
-
     html += `
     <div class="summary-card">
       <div class="summary-header">
@@ -1419,7 +1316,6 @@ function renderSummary(){
   });
   summaryContent.innerHTML = html;
 }
-
 /* ---------------- Summary Out (สรุปเบิกจ่ายแยกตามวัน) ---------------- */
 function renderSummaryOut(){
   const outs = transactions.filter(t=>t.type==='out');
@@ -1427,19 +1323,15 @@ function renderSummaryOut(){
     summaryOutContent.innerHTML = `<div class="empty"><b>ยังไม่มีข้อมูลเบิกจ่ายออก</b>เริ่มบันทึกการเบิกใช้ได้ที่หน้าบันทึกรับ-จ่าย</div>`;
     return;
   }
-
   const groups = {};
   outs.forEach(t=>{
     if(!groups[t.date]) groups[t.date] = [];
     groups[t.date].push(t);
   });
-
   const sortedDates = Object.keys(groups).sort((a,b)=>b.localeCompare(a));
-
   let html = '';
   sortedDates.forEach(date=>{
     const list = groups[date];
-
     html += `
     <div class="summary-card">
       <div class="summary-header">
@@ -1464,7 +1356,6 @@ function renderSummaryOut(){
   });
   summaryOutContent.innerHTML = html;
 }
-
 /* ---------------- Modal ของใกล้หมด (ส่งไลน์) ---------------- */
 const lowStockModal = document.getElementById('lowStockModal');
 function openLowStockModal(){
@@ -1482,7 +1373,6 @@ function openLowStockModal(){
 }
 document.getElementById('closeLowModalBtn').addEventListener('click', ()=> lowStockModal.classList.remove('open'));
 lowStockModal.addEventListener('click', (e)=>{ if(e.target===lowStockModal) lowStockModal.classList.remove('open'); });
-
 document.getElementById('copyLineBtn').addEventListener('click', ()=>{
   const ta = document.getElementById('lowStockTextarea');
   ta.select();
@@ -1493,7 +1383,6 @@ document.getElementById('copyLineBtn').addEventListener('click', ()=>{
     alert('คัดลอกข้อความแล้ว!');
   });
 });
-
 // เริ่มต้นโหลดข้อมูล
 loadStockData();
 </script>
