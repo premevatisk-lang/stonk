@@ -547,7 +547,7 @@ table.ledger tr:last-child td{border-bottom:none;}
       <h1>สต๊อกของ — @prem hotel</h1>
       <p class="subtitle">คลังของ บัญชีรับ-จ่าย และต้นทุน พร้อมแจ้งเตือนของใกล้หมด</p>
       <!-- เลขเวอร์ชัน: เอาไว้เช็คด้วยตาว่าไฟล์ที่ deploy ขึ้น GitHub Pages เป็นตัวล่าสุดจริงไหม -->
-      <p style="font-size:10px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;margin:2px 0 0;">build: v8-badge-empty-fix</p>
+      <p style="font-size:10px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;margin:2px 0 0;">build: v9-no-clobber-fix</p>
     </div>
     <div class="stats" id="stats"></div>
   </header>
@@ -832,6 +832,7 @@ function saveAll(){
 }
 async function loadStockData(){
   setSyncBadge('busy');
+  let loadOk = false; // แก้บั๊กร้ายแรง: ต้องรู้ให้ชัดว่าโหลดจาก Cloud "สำเร็จจริง" หรือ "ล้มเหลวแล้ว fallback"
   try{
     const data = await storage.get();
     if(data){
@@ -839,6 +840,7 @@ async function loadStockData(){
       categories = data.categories || [];
       transactions = data.transactions || [];
       setSyncBadge('ok');
+      loadOk = true;
     }else{
       items = []; categories = []; transactions = [];
       setSyncBadge('err');
@@ -848,7 +850,13 @@ async function loadStockData(){
     items = []; categories = []; transactions = [];
     setSyncBadge('err');
   }
-  if(categories.length === 0){
+  // แก้บั๊กร้ายแรง: เดิมโค้ดนี้รันทุกครั้งที่ categories ว่าง ไม่ว่าจะเพราะ "โหลดสำเร็จแต่ยังไม่
+  // เคยตั้งหมวดหมู่" หรือเพราะ "โหลดล้มเหลว" (fetch พัง/เน็ตหลุด) ก็ตาม — ถ้าโหลดล้มเหลวแล้วดัน
+  // saveAll() ทับ จะเขียนแถวใหม่ที่มี items ว่างเปล่าลงชีต แล้วแถวว่างนี้จะถูกเลือกเป็น "ล่าสุด"
+  // (เพราะระบบเลือกจาก _savedAt ที่มากสุด) ทับข้อมูลจริงที่เคยบันทึกไว้ไปเลยอย่างถาวร — sync
+  // badge ยังขึ้น "ok" ปกติด้วยเพราะโค้ดแค่บันทึกไม่ผิดพลาด แต่ข้อมูลที่บันทึกไปคือของว่างเปล่า
+  // ทางแก้: seed ค่าเริ่มต้น + save ได้ก็ต่อเมื่อ loadOk === true (โหลดจริงสำเร็จ) เท่านั้น
+  if(loadOk && categories.length === 0){
     categories = [...DEFAULT_CATS];
     saveAll();
   }
