@@ -759,7 +759,11 @@ function setSyncBadge(state){
 const storage = {
   async get(){
     try{
-      const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}`);
+      // แก้บั๊ก: SheetDB มีระบบ cache ผลลัพธ์ของ GET ไว้ชั่วคราว ทำให้เปิดจากเครื่อง/มือถือ
+      // เครื่องอื่นแล้วได้ข้อมูลเก่าที่ยังไม่อัปเดต — เติม query param สุ่ม (cache-buster)
+      // ต่อท้าย URL ทุกครั้ง เพื่อให้ทั้ง SheetDB และเบราว์เซอร์มองว่าเป็น request ใหม่เสมอ
+      // แล้วสั่ง cache: 'no-store' กันเบราว์เซอร์เก็บ cache เองซ้ำอีกชั้นด้วย
+      const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}?_ts=${Date.now()}`, { cache: 'no-store' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const rows = await res.json();
       // เนื่องจากตอนนี้บันทึกด้วย POST เพิ่มแถวใหม่ทุกครั้ง (ดูเหตุผลใน set() ด้านล่าง)
