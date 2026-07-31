@@ -547,7 +547,7 @@ table.ledger tr:last-child td{border-bottom:none;}
       <h1>สต๊อกของ — @prem hotel</h1>
       <p class="subtitle">คลังของ บัญชีรับ-จ่าย และต้นทุน พร้อมแจ้งเตือนของใกล้หมด</p>
       <!-- เลขเวอร์ชัน: เอาไว้เช็คด้วยตาว่าไฟล์ที่ deploy ขึ้น GitHub Pages เป็นตัวล่าสุดจริงไหม -->
-      <p style="font-size:10px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;margin:2px 0 0;">build: v7-savedAt-fix</p>
+      <p style="font-size:10px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;margin:2px 0 0;">build: v8-badge-empty-fix</p>
     </div>
     <div class="stats" id="stats"></div>
   </header>
@@ -1033,6 +1033,10 @@ function renderInventory(){
   }
   if(filtered.length === 0){
     contentEl.innerHTML = `<div class="empty"><b>ไม่พบรายการของ</b>ลองค้นหาใหม่ หรือกดเพิ่มของ</div>`;
+    // แก้บั๊ก: เดิม return ตรงนี้เลย ทำให้ setSyncBadge(lastSyncState) ท้ายฟังก์ชันไม่ถูกเรียก
+    // ป้ายสถานะซิงค์เลยค้างที่ค่า placeholder "💾" เฉยๆ ไม่มีข้อความ/สี ทั้งที่จริงอาจซิงค์
+    // สำเร็จหรือพังก็ได้ — ทำให้ debug ยากเพราะมองไม่เห็นสถานะจริงตอนไม่มีของเลย
+    setSyncBadge(lastSyncState);
     return;
   }
   let html = '<div class="grid">';
