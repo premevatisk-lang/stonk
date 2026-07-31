@@ -763,21 +763,29 @@ function setSyncBadge(state){
 const storage = {
   async get(){
     try{
-      // แก้บั๊ก: SheetDB มีระบบ cache ผลลัพธ์ของ GET ไว้ชั่วคราว ทำให้เปิดจากเครื่อง/มือถือ
-      // เครื่องอื่นแล้วได้ข้อมูลเก่าที่ยังไม่อัปเดต — เติม query param สุ่ม (cache-buster)
-      // ต่อท้าย URL ทุกครั้ง เพื่อให้ทั้ง SheetDB และเบราว์เซอร์มองว่าเป็น request ใหม่เสมอ
-      // แล้วสั่ง cache: 'no-store' กันเบราว์เซอร์เก็บ cache เองซ้ำอีกชั้นด้วย
+      // เติม query param สุ่ม (cache-buster) + cache:'no-store' กันเบราว์เซอร์เก็บ cache เอง
       const res = await fetch(`${SHEET_API_URL}/id/${SHEET_ROW_ID}?_ts=${Date.now()}`, { cache: 'no-store' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       const rows = await res.json();
-      // เนื่องจากตอนนี้บันทึกด้วย POST เพิ่มแถวใหม่ทุกครั้ง (ดูเหตุผลใน set() ด้านล่าง)
-      // อาจมีหลายแถวที่ id=1 สะสมอยู่ ต้องเอา "แถวล่าสุด" (ตัวท้ายสุดของอาเรย์) มาใช้เสมอ
+      // แก้บั๊กรอบ 3: เดิมเดาว่า "แถวสุดท้ายที่ API ส่งกลับมา" คือแถวล่าสุด แต่พอมีแถวสะสม
+      // เยอะขึ้นเรื่อยๆ (เพราะบันทึกด้วย POST สร้างแถวใหม่ทุกครั้ง) จะเชื่อลำดับที่ API
+      // ส่งกลับมาไม่ได้แน่นอน 100% (อาจมี limit/ลำดับไม่ตรงกับที่คาด) ทางแก้ที่ชัวร์กว่าคือ
+      // ฝังเวลาบันทึกจริง (_savedAt) ไว้ในตัวข้อมูลเอง (ดู set() ด้านล่าง) แล้วมาเทียบเวลา
+      // ตรงๆ เพื่อเลือกแถวที่บันทึกล่าสุดจริงๆ ไม่ต้องเดาจากลำดับอาเรย์อีกต่อไป
       if(Array.isArray(rows) && rows.length > 0){
-        const latest = rows[rows.length - 1];
-        if(latest && latest.data){
-          const parsed = JSON.parse(latest.data);
-          localStorage.setItem(STORE_KEY, latest.data); // เก็บสำรองไว้ในเครื่องด้วย
-          return parsed;
+        let best = null;
+        let bestTs = -1;
+        for(const row of rows){
+          if(!row || !row.data) continue;
+          try{
+            const parsedRow = JSON.parse(row.data);
+            const ts = typeof parsedRow._savedAt === 'number' ? parsedRow._savedAt : 0;
+            if(ts >= bestTs){ bestTs = ts; best = { raw: row.data, parsed: parsedRow }; }
+          }catch(parseErr){ /* แถวนี้ข้อมูลเพี้ยน ข้ามไป */ }
+        }
+        if(best){
+          localStorage.setItem(STORE_KEY, best.raw); // เก็บสำรองไว้ในเครื่องด้วย
+          return best.parsed;
         }
       }
       return null;
@@ -788,15 +796,13 @@ const storage = {
     }
   },
   async set(dataObj){
-    const json = JSON.stringify(dataObj);
+    // ฝังเวลาบันทึกจริง (_savedAt) ไว้ในก้อนข้อมูล เพื่อให้ get() รู้แน่ชัดว่าแถวไหนใหม่สุด
+    const payload = Object.assign({}, dataObj, { _savedAt: Date.now() });
+    const json = JSON.stringify(payload);
     localStorage.setItem(STORE_KEY, json); // เซฟในเครื่องก่อนเสมอ กันข้อมูลหาย
     try{
-      // แก้บั๊กรอบ 2: เดิมส่ง Content-Type: text/plain เพื่อหวังเลี่ยง CORS preflight
-      // แต่ผลข้างเคียงคือ SheetDB (เซิร์ฟเวอร์ฝั่งนั้น) อ่าน body ไม่ออกว่าเป็น JSON เลย
-      // ทำให้ request "ไปถึง" เซิร์ฟเวอร์จริง (เห็นใน usage log) แต่ข้อมูลที่เขียนกลายเป็น
-      // ค่าว่าง/ผิดรูปแบบ (ในชีตจริงเจอค่า "{}" ว่างเปล่า ทั้งที่กดบันทึกของไปหลายรายการแล้ว)
-      // ทางแก้ที่ถูกต้อง: ใช้ Content-Type: application/json ตามมาตรฐานจริง — SheetDB
-      // รองรับ CORS preflight (OPTIONS) ของ POST อยู่แล้วตามปกติสำหรับการใช้งานจากเบราว์เซอร์
+      // ใช้ Content-Type: application/json ตามมาตรฐานจริง (ห้ามใช้ text/plain เพราะ
+      // SheetDB จะอ่าน body ไม่ออก แล้วเขียนข้อมูลว่างเปล่าลงชีตแทน)
       const res = await fetch(SHEET_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
